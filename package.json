@@ -1,0 +1,11 @@
+{
+  "name": "k12-chemistry-adventure",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "node build-chemistry.mjs",
+    "test": "node build-chemistry.mjs && node --test tests/chemistry.test.mjs"
+  }
+}
