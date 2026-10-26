@@ -37,6 +37,8 @@ node --test tests/chemistry.test.mjs
 
 根目錄 `index.html` 會導向 `dist/chemistry/index.html`，GitHub Pages 由 `main` 分支根目錄提供服務。
 
+發布前先執行建置；建置會依程式與樣式內容更新資源版本與 import map，避免新版頁面混用舊快取。請將更新後的 `dist/chemistry/index.html` 一起提交。
+
 ## 視覺與互動
 
 視覺精修包含深綠導覽、手札封面、五站探索地圖、卡片內四步導引、閱讀位置提示與實驗控制面板。樣式位於 `dist/chemistry/polish.css`，導引互動位於 `polish.js`；科學計算仍使用原有核心。
