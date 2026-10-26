@@ -682,16 +682,16 @@ export const practiceProblems=[
 
 
 const take=id=>lessons.find(c=>c.id===id);
+// Stable IDs preserve saved answers; order is independent of those IDs.
 export const cards=[
- {...take(2),id:1,act:'第一站 · 從點金傳說到實驗證據',story:take(1).story+' 小葵決定親自選材料，檢查里昂的說法。',prediction:take(1).prediction,choices:take(1).choices,dialogue:take(1).dialogue,task:'留下你的點金猜想，操作四種反應，改變用量與條件。用新物質的證據判斷變化。',extras:[1],bridge:'有氣泡跑出瓶口，天平竟然變輕了。物質真的消失了嗎？'},
- {...take(3),id:2,act:'第二站 · 追蹤消失的重量',extras:[4],bridge:'原子重新排列，卻沒有消失。下一站試著量出原子與分子的相對重量。'},
- {...take(5),id:3,title:'原子、分子與莫耳',act:'第三站 · 從一顆原子到一莫耳',question:'怎麼用原子與分子的質量，數出看不見的微粒？',task:'親手組出合法分子，旋轉、放大並比較質量；接著用莫耳把微粒數與克數連起來。',extras:[6,7],bridge:'能計算微粒了，接下來要讓反應式中的每一顆原子都對得上。'},
- {...take(9),id:4,act:'第四站 · 解開煉成陣的數字密碼',story:'里昂把古書上的紋章換成化學式，卻想改掉 H₂O 的下標讓左右相等。小葵攔住他：「那就不是水了！」',extras:[8,10],bridge:'係數是粒子與莫耳的比例。最後用它預測產量，再解開點石成金的真相。'},
- {...take(11),id:5,act:'第五站 · 精準煉成與點金真相',title:'精準煉成工坊：化學計量',question:'已知投入多少克，如何算出能生成多少克產物？',prediction:take(11).prediction,choices:take(11).choices,task:'選材料用量，跟著三步算出產物有幾克。算完可換用量試試，最後解開點金傳說。',extras:[12],bridge:'里昂沒有找到造金的咒語，卻學會讓每個推論都有證據。這就是三人真正找到的寶藏。'}
+ {...take(5),...journey[3],id:3,title:'原子量、分子量與莫耳',act:'第一站 · 先建立微粒與質量的觀念',story:'小葵與阿公翻開閣樓裡的《煉金之書》，遇見了帶著賢者之石的里昂。正式研究配方之前，阿公先準備三把鑰匙：原子量、分子量與莫耳。',dialogue:[['leon','curious','原子小得看不見，怎麼知道它多重、有多少？'],['kui','thinking','先比較原子的質量，再把一個分子裡的原子加起來。'],['grandpa','gentle','接著用莫耳，把微粒的個數和天平量到的克數接起來。']],question:'原子量、分子量與莫耳，分別在回答什麼問題？',task:'先閱讀三個基礎觀念與水的換算例子，再組出分子模型；接著練習莫耳與質量換算。',extras:[4,6,7],bridge:'知道物質由哪些微粒組成，接著來辨認化學反應留下的現象。'},
+ {...take(2),...journey[1],id:1,type:'phenomena',title:'化學反應的常見現象',act:'第二站 · 用新物質判斷化學變化',prediction:take(1).prediction,choices:take(1).choices,story:'里昂舉起發光的賢者之石，認為它能把石頭變成黃金。阿公請大家先閱讀四份實驗觀察：光、顏色、固體和氣泡，分別告訴我們什麼？',task:'閱讀四種常見反應現象，分清「看見變化」與「確認生成新物質」，再回答下面的判斷題。',extras:[],bridge:'有了反應物與生成物的證據，下一站學會用化學式把反應寫下來。'},
+ {...take(9),...journey[4],id:4,title:'化學反應式怎麼寫？',act:'第三站 · 從文字到配平的反應式',extras:[8,10],bridge:'反應式的係數告訴我們莫耳數的比例。接著用這個比例算出產物有幾克。'},
+ {...take(11),...journey[5],id:5,title:'用反應式預測產量',act:'第四站 · 看懂示範，再自己計算',question:'已知投入多少克，如何算出能生成多少克產物？',task:'改變材料用量，觀察系統自動示範的三步計算與產量；看懂後，再到下方題目自己練習。',extras:[],bridge:'算出產物之後，最後到天平前驗證：反應前後的總質量是否相同？'},
+ {...take(3),...journey[2],id:2,title:'質量守恆：追蹤每一克',act:'第五站 · 在實驗室驗證質量守恆',task:'拿取小蘇打小杯、準備開放或密閉裝置，記錄反應前質量後再傾斜混合。保留相同用量，完成兩種條件的比較。',extras:[12],bridge:'把氣體也算進去，物質沒有憑空消失。最後整理原子的證據，替點石成金寫下有理由的答案。'}
 ];
-cards.forEach(c=>Object.assign(c,journey[c.id]));
 lessons[0].story='里昂認為賢者之石的光芒就是證據。小葵把三種變化並排，請他先比較：前後的微粒有沒有改變？';
-export const supplementCards=[1,4,6,7,8,10,12].map(sourceId=>({...take(sourceId),id:'extra-'+sourceId,sourceId}));
+export const supplementCards=[4,6,7,8,10,12].map(sourceId=>({...take(sourceId),id:'extra-'+sourceId,sourceId}));
 export const supplementTitles={
 1:'先看有沒有新物質：物理變化與化學變化',
 4:'把原子放大看：原子裡有什麼？',

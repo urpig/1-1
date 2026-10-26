@@ -6,3 +6,6 @@ release/
 .env.*
 .DS_Store
 Thumbs.db
+
+# Machine-specific local preview launcher
+/Start-preview.cmd

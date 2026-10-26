@@ -18,7 +18,7 @@ test('peroxide and original combined challenge',()=>{const x=react('peroxide',[6
 test('step clock completes once at ten frames and resets',()=>{let p=0,done=0;const c=reactionClock(x=>p=x,()=>done++);for(let i=0;i<15;i++)c.step();assert.equal(p,1);assert.equal(done,1);c.reset();assert.equal(p,0);for(let i=0;i<10;i++)c.step();assert.equal(done,2);});
 test('saved data is validated and recorded numbers recalculated',()=>{const x=cleanData({labDone:['magnesium','evil'],labRecords:[{id:'evil',dose:2,partner:1},{id:'magnesium',dose:2.4,partner:3.2,observation:'<script>',products:[]}],massRecords:[{soda:4.2,acid:6,closed:true,reading:0}],step4:-5,practiceSolved:'bad'});assert.equal(x.labRecords.length,1);near(x.labRecords[0].products[0].mass,4);near(x.massRecords[0].reading,230.2);assert.equal(x.step4,0);assert.deepEqual(x.practiceSolved,[]);});
 test('SVG gradient IDs never collide',()=>{const a=svgFrame('<path fill="url(#glass)"/>','a'),b=svgFrame('<path fill="url(#glass)"/>','b');assert.notEqual(a.match(/id="([^"]+)/)[1],b.match(/id="([^"]+)/)[1]);assert.ok(!a.includes('url(#glass)'));});
-test('5 interactive cards retain all 12 source topics and seven practice types',()=>{assert.equal(cards.length,5);assert.equal(lessons.length,12);assert.equal(supplementCards.length,7);assert.deepEqual(cards.map(x=>x.id),Array.from({length:5},(_,i)=>i+1));assert.equal(cards.filter(x=>['lab','mass','molecule','balance','stoich'].includes(x.type)).length,5);for(const c of [...cards,...supplementCards]){assert.ok(c.story&&c.task&&c.bridge&&c.explanation.length);assert.equal(c.quiz.feedback.length,c.quiz.options.length);assert.ok(c.quiz.answer<c.quiz.options.length);}assert.equal(practiceProblems.length,7);});
+test('five learning stations retain source lessons and seven practice types',()=>{assert.equal(cards.length,5);assert.equal(lessons.length,12);assert.equal(supplementCards.length,6);assert.deepEqual(cards.map(x=>x.id),[3,1,4,5,2]);assert.equal(cards.filter(x=>['mass','molecule','balance','stoich'].includes(x.type)).length,4);for(const c of [...cards,...supplementCards]){assert.ok(c.story&&c.task&&c.bridge&&c.explanation.length);assert.equal(c.quiz.feedback.length,c.quiz.options.length);assert.ok(c.quiz.answer<c.quiz.options.length);}assert.equal(practiceProblems.length,7);});
 
 
 test('hydrate multiplier stays on baseline in rendered chemistry formula',async()=>{const {formulaHTML}=await import('../dist/chemistry/core.js');assert.equal(formulaHTML('CuSO4·5H2O'),'CuSO<sub>4</sub>·5H<sub>2</sub>O');});
@@ -32,7 +32,7 @@ test('drag has hit testing, cancellation and keyboard fallback',async()=>{
  b.handlers.pointerdown(event(0,0));b.handlers.pointermove(event(140,140));b.handlers.keydown({key:'Escape'});b.handlers.pointerup(event(140,140));assert.equal(drops,1);
  b.handlers.keydown({key:'Enter'});b.handlers.click(event(0,0));assert.equal(drops,2);
 });
-test('five-card consolidation covers all original lesson identities exactly once',()=>{assert.deepEqual(cards.map(c=>c.type),['lab','mass','molecule','balance','stoich']);assert.deepEqual(cards.flatMap(c=>c.extras),[1,4,6,7,8,10,12]);assert.equal(cards[0].prediction,lessons[0].prediction);assert.equal(cards[4].prediction,lessons[10].prediction);});
+test('concepts precede phenomena and equations; conservation and conclusion come last',()=>{assert.deepEqual(cards.map(c=>c.type),['molecule','phenomena','balance','stoich','mass']);assert.deepEqual(cards.flatMap(c=>c.extras),[4,6,7,8,10,12]);assert.equal(cards.find(c=>c.id===1).prediction,lessons[0].prediction);assert.equal(cards.find(c=>c.id===5).prediction,lessons[10].prediction);assert.ok(cards.at(-1).extras.includes(12));});
 
 
 test('residual solid drawings agree with the limiting reagent result',async()=>{
@@ -76,7 +76,7 @@ test('product apparatus distinguishes gases from liquids and solids',async()=>{
 });
 test('three characters carry a causal story through all five workbenches',()=>{
  for(const c of cards){assert.deepEqual(c.dialogue.map(d=>d[0]),['leon','kui','grandpa']);assert.ok(c.evidence&&c.bridge);}
- assert.notEqual(cards[4].prediction,lessons[11].prediction);
+ assert.notEqual(cards.find(c=>c.id===5).prediction,lessons[11].prediction);
  assert.equal(cleanData({finalPrediction:1}).finalPrediction,1);assert.equal(cleanData({finalPrediction:99}).finalPrediction,undefined);
 });
 
@@ -133,4 +133,25 @@ test('answer validation preserves tiny particle masses and rejects bad input',()
 });
 test('handout progress drops unknown and duplicate ids while retaining completed questions',()=>{
  const x=cleanData({handoutSolved:['core-0','core-0','invalid','single-carbon',3]});assert.deepEqual(x.handoutSolved,['core-0','single-carbon']);
+});
+
+import {sameLabRun,uniqueLabRecords} from '../dist/chemistry/lab-records.js';
+import {labMassComparison} from '../dist/chemistry/lab-mass.js';
+test('repeated experiment inputs and products retain one record, while changed quantities stay distinct',()=>{
+ const record={id:'magnesium',dose:2.4,partner:3.2,products:[{formula:'MgO',mass:4}]};
+ const repeat={...record,observation:'a different description',products:[{formula:'MgO',mass:4}]};
+ assert.ok(sameLabRun(record,repeat));assert.equal(uniqueLabRecords([record,repeat]).length,1);
+ const changedInput={...record,partner:4};assert.ok(!sameLabRun(record,changedInput));
+ const changedProduct={...record,products:[{formula:'MgO',mass:3}]};assert.ok(!sameLabRun(record,changedProduct));
+ assert.equal(uniqueLabRecords([record,repeat,changedInput,changedProduct]).length,3);
+});
+test('mass display includes unused material in the final total, including oxygen-limited runs',()=>{
+ for(const masses of [[2.4,3.2],[2.4,.8],[0,0]]){
+  const r=react('magnesium',masses,1),markup=labMassComparison('magnesium',masses,r,1);
+  assert.ok(markup.includes('反應前 · 材料總重'));assert.ok(markup.includes('反應後 · 全部物質總重'));
+  assert.ok(markup.includes('剩餘材料'));assert.ok(!markup.includes('NaN'));assert.ok(!markup.includes('Infinity'));
+  near(r.inputMass,r.outputMass);
+ }
+ const html=labMassComparison('magnesium',[2.4,3.2],react('magnesium',[2.4,3.2],1),1);
+ assert.ok(html.includes('產物 4 g ＋ 剩餘材料 1.6 g'));assert.ok(html.includes('2.4 g ＋ 結合的氧氣 1.6 g'));
 });

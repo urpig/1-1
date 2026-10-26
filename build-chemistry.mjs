@@ -16,9 +16,10 @@ function visit(file){
 visit('app.js');
 const script="'use strict';\nconst __modules={};\n"+modules.join('\n');new vm.Script(script);
 function image(file){return 'data:image/png;base64,'+fs.readFileSync(path.resolve(root,file)).toString('base64');}
-let css=fs.readFileSync(path.join(root,'styles.css'),'utf8').replace(/url\(['"]?((?:\.\.\/assets\/story\/|\.\/assets\/)[^)'"\s]+)['"]?\)/g,(_,file)=>'url("'+image(file)+'")');
+let css=['styles.css','polish.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n').replace(/url\(['"]?((?:\.\.\/assets\/story\/|\.\/assets\/)[^)'"\s]+)['"]?\)/g,(_,file)=>'url("'+image(file)+'")');
 let html=fs.readFileSync(path.join(root,'index.html'),'utf8')
 .replace('<link rel="stylesheet" href="./styles.css">',()=>'<style>'+css+'</style>')
+.replace('<link rel="stylesheet" href="./polish.css">','')
 .replace('src="./assets/alchemy-attic.png"',()=>'src="'+image('./assets/alchemy-attic.png')+'"')
 .replace('<script type="module" src="./app.js"></script>',()=>'<script>'+script.replaceAll('</script','<\\/script')+'</script>');
 if(/(?:src|href)="\.\/(?:styles\.css|app\.js|assets\/)/.test(html))throw new Error('Unbundled local dependency');
