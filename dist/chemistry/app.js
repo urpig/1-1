@@ -1,4 +1,5 @@
-import { foundationLesson, equationLesson, mountPhenomena } from './lesson-intro.js';
+import { mountPhenomena } from './phenomena.js';
+import { foundationLesson, equationLesson } from './lesson-intro.js';
 import { mountPolish } from './polish.js';
 import { handoutPractice } from './handout-practice-data.js';
 import { TermPrimer, mountTerminology } from './terminology.js';
@@ -41,7 +42,7 @@ export function ChapterProgress(){
  cards.forEach(c=>{const a=document.querySelector('[data-nav="'+c.id+'"]');a.querySelector('.nav-state').textContent=mastered(c)?'✓':state.observed.includes(c.id)?'◐':'○';a.classList.toggle('mastered',mastered(c));});
  supplementCards.forEach(c=>{const badge=document.querySelector('[data-extra-status="'+c.id+'"]');if(badge)badge.textContent=mastered(c)?'已完成 ✓':state.observed.includes(c.id)?'已觀察 · 再試一題':c.sourceId===12?'跟著阿公一起想':'展開探索';});
  document.querySelector('#completion-banner').hidden=n!==5;
- cards.forEach(c=>{document.querySelector('#chem-'+c.id+' .story-earned').hidden=!state.observed.includes(c.id);const host=document.querySelector('#chem-'+c.id+' .lesson-checkpoints');if(host)host.innerHTML='<b>本站學習清單</b><span>'+ (baseMastered(c)?'✓':'○')+(c.type==='phenomena'?' 圖解閱讀與小試身手':' 互動操作與小試身手')+'</span>'+c.extras.map(id=>{const e=supplementCards.find(x=>x.sourceId===id);return '<button type="button" data-open-extra="'+id+'">'+(baseMastered(e)?'✓':'○')+' '+supplementTitles[id]+'</button>';}).join('');});
+ cards.forEach(c=>{document.querySelector('#chem-'+c.id+' .story-earned').hidden=!state.observed.includes(c.id);const host=document.querySelector('#chem-'+c.id+' .lesson-checkpoints');if(host)host.innerHTML='<b>本站學習清單</b><span>'+ (baseMastered(c)?'✓':'○')+(c.type==='phenomena'?' 反應觀察與小試身手':' 互動操作與小試身手')+'</span>'+c.extras.map(id=>{const e=supplementCards.find(x=>x.sourceId===id);return '<button type="button" data-open-extra="'+id+'">'+(baseMastered(e)?'✓':'○')+' '+supplementTitles[id]+'</button>';}).join('');});
 }
 export function StoryDialogue(dialogue){
  const expressions={wonder:'好奇',curious:'思考',excited:'興奮',mentor:'引導',surprised:'驚訝',idea:'靈機一動',thoughtful:'沉思',thinking:'思考',gentle:'溫和',determined:'堅定',encourage:'鼓勵'};

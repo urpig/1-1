@@ -15,7 +15,7 @@ export function mountPolish(cards){
  sheets.forEach((sheet,index)=>{
   const header=sheet.querySelector('.card-header');header.dataset.chapterNumber=String(index+1).padStart(2,'0');
   const waypoints=document.createElement('nav');waypoints.className='card-waypoints';waypoints.setAttribute('aria-label','第 '+(index+1)+' 站的學習步驟');
-  const steps=[['讀線索','.story-opening'],['猜一猜','.prediction'],[cards[index].type==='phenomena'?'看圖解':'動手探索','.activity'],['小試身手','.quiz']];
+  const steps=[['讀線索','.story-opening'],['猜一猜','.prediction'],[cards[index].type==='phenomena'?'看反應':'動手探索','.activity'],['小試身手','.quiz']];
   steps.forEach(([label,selector],i)=>{
    const button=document.createElement('button');button.type='button';button.innerHTML='<span aria-hidden="true">'+(i+1)+'</span>'+label;
    button.addEventListener('click',()=>{
