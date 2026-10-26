@@ -11,13 +11,13 @@ const atoms=model.atoms.map(([e,x,y,z],i)=>{const x1=x*Math.cos(angle)+z*Math.si
 let visible=atoms;
 if(counts){const used={};visible=atoms.filter(a=>(used[a.e]=(used[a.e]||0)+1)<= (counts[a.e]||0));}
 const visibleIds=new Set(visible.map(a=>a.i));
-let s='<rect width="760" height="440" rx="14" fill="#f3f7f3"/><ellipse cx="380" cy="354" rx="200" ry="25" fill="#becbb5" opacity=".23"/>';
-s+='<g color="#bda774" opacity=".55">'+alchemyRing(380,207,168,visible.length/model.atoms.length)+'</g>'+label(380,38,'拖曳旋轉 · 方向鍵也能操作',12);for(const a of atoms.filter(a=>!visibleIds.has(a.i)))s+='<circle class="atom-socket" cx="'+a.x+'" cy="'+a.y+'" r="'+(a.e==='H'?22:36)*zoom+'" fill="#ffffff55" stroke="#a6bbb0" stroke-width="1.5" stroke-dasharray="4 5"/>'+label(a.x,a.y+5,a.e,14,'#8da598');
-for(const [a,b]of model.bonds)if(visibleIds.has(a)&&visibleIds.has(b))s+='<line x1="'+atoms[a].x+'" y1="'+atoms[a].y+'" x2="'+atoms[b].x+'" y2="'+atoms[b].y+'" stroke="#aebeb5" stroke-width="'+(15*zoom)+'" stroke-linecap="round"/>';
+let s='<defs><radialGradient id="model-room" cx="48%" cy="40%" r="75%"><stop stop-color="#315c52"/><stop offset="1" stop-color="#102e2a"/></radialGradient><radialGradient id="model-floor"><stop stop-color="#93b5a0" stop-opacity=".28"/><stop offset="1" stop-color="#93b5a0" stop-opacity="0"/></radialGradient></defs><rect width="760" height="440" rx="14" fill="url(#model-room)"/><ellipse cx="380" cy="355" rx="265" ry="50" fill="url(#model-floor)"/><path d="M80 370H680M100 390H660" stroke="#a5c2ac" stroke-opacity=".12"/>';
+s+='<g color="#d5c392" opacity=".50">'+alchemyRing(380,207,168,visible.length/model.atoms.length)+'</g>'+label(380,38,'拖曳旋轉 · 方向鍵也能操作',13,'#b7ccbc');for(const a of atoms.filter(a=>!visibleIds.has(a.i)))s+='<circle class="atom-socket" cx="'+a.x+'" cy="'+a.y+'" r="'+(a.e==='H'?22:36)*zoom+'" fill="#cfe6ce09" stroke="#c5d6c3" stroke-width="1.5" stroke-dasharray="4 5"/>'+label(a.x,a.y+5,a.e,16,'#d8e2d5');
+for(const [a,b]of model.bonds)if(visibleIds.has(a)&&visibleIds.has(b))s+='<line x1="'+atoms[a].x+'" y1="'+atoms[a].y+'" x2="'+atoms[b].x+'" y2="'+atoms[b].y+'" stroke="#d1dcd0" stroke-width="'+(15*zoom)+'" stroke-linecap="round"/>';
 for(const a of visible.sort((a,b)=>a.z-b.z)){const radius=(a.e==='H'?22:36)*zoom*(1+a.z*.06),col=elements[a.e].color;
-s+='<defs><radialGradient id="atom-'+a.i+'" cx="30%" cy="25%"><stop stop-color="#fff"/><stop offset=".32" stop-color="'+col+'"/><stop offset="1" stop-color="'+col+'" stop-opacity=".8"/></radialGradient></defs><circle cx="'+a.x+'" cy="'+a.y+'" r="'+radius+'" fill="url(#atom-'+a.i+')" stroke="#536e65" stroke-opacity=".4" stroke-width="1.5"/>'+label(a.x,a.y+6,a.e,18*zoom,a.e==='C'?'#fff':'#233e36');
+s+='<ellipse cx="'+(a.x+5)+'" cy="'+(a.y+39*zoom)+'" rx="'+(radius*.8)+'" ry="'+(radius*.2)+'" fill="#091d16" opacity=".3"/><defs><radialGradient id="atom-'+a.i+'" cx="30%" cy="25%"><stop stop-color="#fff"/><stop offset=".32" stop-color="'+col+'"/><stop offset="1" stop-color="'+col+'" stop-opacity=".8"/></radialGradient></defs><circle cx="'+a.x+'" cy="'+a.y+'" r="'+radius+'" fill="url(#atom-'+a.i+')" stroke="#536e65" stroke-opacity=".4" stroke-width="1.5"/>'+label(a.x,a.y+6,a.e,18*zoom,a.e==='C'?'#fff':'#233e36');
 }
-s+=label(380,400,model.kind==='式單位'?'組成比例示意 · 不是獨立分子或實際晶格':'球棍模型 · 原子大小與鍵長為教學示意',14);
+s+=label(380,400,model.kind==='式單位'?'組成比例示意 · 不是獨立分子或實際晶格':'球棍模型 · 原子大小與鍵長為教學示意',13,'#bfd1bf');
 return svgFrame(s,'可旋轉的'+model.name+model.kind+'模型');
 }
 export function particleGroup(formula,count){

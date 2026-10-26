@@ -41,7 +41,7 @@ export function massTrace(initial,reading,progress){
 // One short next action; repeated animation frames do not re-announce unchanged guidance.
 export function guideStep(root,title,detail,selector=''){
  let guide=root.querySelector('.interaction-guide');
- if(!guide){guide=document.createElement('div');guide.className='interaction-guide';guide.setAttribute('role','status');guide.setAttribute('aria-live','polite');guide.innerHTML='<span class="guide-icon" aria-hidden="true">↗</span><div><b class="guide-title"></b><p class="guide-detail"></p></div><span class="guide-label">操作小提示</span>';root.prepend(guide);}
+ if(!guide){guide=document.createElement('div');guide.className='interaction-guide';guide.setAttribute('role','status');guide.setAttribute('aria-live','polite');guide.innerHTML='<span class="guide-icon" aria-hidden="true">↗</span><div><b class="guide-title"></b><p class="guide-detail"></p></div><span class="guide-label">操作小提示</span>';const heading=root.querySelector('.studio-heading');if(heading)heading.after(guide);else root.prepend(guide);}
  if(guide.querySelector('.guide-title').textContent!==title)guide.querySelector('.guide-title').textContent=title;
  if(guide.querySelector('.guide-detail').textContent!==detail)guide.querySelector('.guide-detail').textContent=detail;
  root.querySelectorAll('.next-action').forEach(x=>x.classList.remove('next-action'));

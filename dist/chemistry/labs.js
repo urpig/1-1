@@ -1,3 +1,4 @@
+import { prepareStudio } from './studio.js';
 import { sameLabRun, uniqueLabRecords } from './lab-records.js';
 import { labMassComparison } from './lab-mass.js';
 import { reactions, react, conservation, format, equationHTML, formulaHTML } from './core.js';
@@ -115,6 +116,7 @@ export function mountLab(root,ctx){
 
 
 export function mountMass(root,ctx){
+ root.classList.add('mass-studio');
  let soda=4.2,acid=6,p=0,closed=false,collect=false,added=false,running=false,baseline=false,records=ctx.data.massRecords||[];
  root.innerHTML=ExplorationWorkbench(
  '<div class="workbench-caption"><span class="bench-dot"></span><b>質量守恆 · 實驗操作台</b><span>準備 → 秤量 → 混合 → 比較</span></div><div class="apparatus-viewport mass-viewport"><div class="mass-art"></div><div class="drop-zone mass-drop" tabindex="0" role="button" aria-label="把小蘇打小杯放入反應瓶"><span>放入瓶內</span></div><button class="sample-token soda-token" aria-label="拿取秤盤上的小蘇打小杯">'+materialIcon('cup','NaHCO3')+'<span class="soda-dose">4.2 g</span></button><button class="mass-tool seal-action" aria-pressed="false">裝上瓶塞</button><button class="mass-tool connect-action">接上集氣管</button><button class="mass-tool baseline-action" data-run>記錄反應前讀數</button><button class="mass-tool mix-action" data-run>傾斜反應瓶，混合</button></div><p class="bench-instruction">直接點選台上的小杯與器材；小杯也可以拖入反應瓶。先秤量，後混合。</p>',
@@ -122,7 +124,12 @@ export function mountMass(root,ctx){
  '教學模擬：傾斜混合時先不讀值，放回秤盤後再觀察。忽略蒸發、氣體溶解、浮力與測量誤差；集氣袋大小與反應速度不按實際比例。');
  root.querySelector('.workbench').classList.add('mass-workbench');
  root.querySelector('.model-column').insertAdjacentHTML('beforeend','<div class="mass-readout" aria-label="反應前後的質量對照"></div>');
- root.insertAdjacentHTML('beforeend','<div class="observation-panel"><div class="observation-heading"><div><span class="eyebrow">實驗紀錄 / 只改變一個條件</span><h3>氣體的去向，解釋了天平的變化</h3></div><button class="secondary paired-trial">用量不變，換封口方式重做</button></div><div class="mass-graph"></div><div class="pair-feedback" role="status"></div><div class="mass-records"></div><details><summary>沒有氣體的沉澱反應，也守恆嗎？</summary><p>5.30 g Na₂CO₃、5.55 g CaCl₂ 與合計 100 g 水。</p><button class="secondary precip-demo">比較沉澱反應前後</button><div class="precip-result" role="status"></div></details></div>');
+ root.insertAdjacentHTML('beforeend','<div class="observation-panel"><div class="observation-heading"><div><span class="eyebrow">實驗紀錄 / 只改變一個條件</span><h3>氣體的去向，解釋了天平的變化</h3></div><button class="secondary paired-trial">用量不變，換封口方式重做</button></div><div class="pair-comparison"></div><details class="mass-chart-details"><summary>查看這一輪的質量變化圖</summary><div class="mass-graph"></div></details><div class="pair-feedback" role="status"></div><div class="mass-records"></div><details><summary>沒有氣體的沉澱反應，也守恆嗎？</summary><p>5.30 g Na₂CO₃、5.55 g CaCl₂ 與合計 100 g 水。</p><button class="secondary precip-demo">比較沉澱反應前後</button><div class="precip-result" role="status"></div></details></div>');
+ prepareStudio(root,{number:'05',title:'質量守恆實驗室',description:'先秤量，再混合。追蹤氣體，解開天平的變化。'},ctx);
+ const scene=root.querySelector('.scene'),modeBar=document.createElement('div');modeBar.className='lab-mode-bar';modeBar.innerHTML='<div><span class="studio-eyebrow">這一輪的裝置</span><b>氣體會去哪裡？</b></div>';modeBar.append(root.querySelector('.segmented'));scene.querySelector('.workbench-caption').replaceWith(modeBar);modeBar.after(root.querySelector('.mass-workflow'));
+ scene.querySelector('.bench-instruction').outerHTML='<div class="lab-command"><div class="lab-command-copy" aria-live="polite"><span class="studio-eyebrow lab-phase"></span><b class="lab-next-title"></b><p class="lab-next-detail"></p></div><button class="primary lab-next" data-run></button></div>';
+ const settings=root.querySelector('.mass-settings'),settingsPanel=document.createElement('details');settingsPanel.className='material-settings';settingsPanel.innerHTML='<summary><span>調整材料用量</span><small class="material-dose-summary"></small></summary>';settings.before(settingsPanel);settingsPanel.append(settings);
+ const manual=root.querySelector('.mass-action-list'),manualPanel=document.createElement('details');manualPanel.className='manual-actions';manualPanel.innerHTML='<summary>查看完整操作清單</summary>';manual.before(manualPanel);manualPanel.append(manual);root.querySelector('.mass-procedure>.panel-eyebrow').textContent='操作記錄與重設';
  const state=()=>conservation({soda,acid,water:100,closed,collect,progress:p});
  const valid=()=>!root.querySelector('input:invalid');
  function draw(){
@@ -141,7 +148,7 @@ export function mountMass(root,ctx){
   root.querySelector('.pause').disabled=!running;
   root.querySelectorAll('input,[data-system],.paired-trial').forEach(x=>x.disabled=running);
   root.querySelectorAll('[data-system]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.system==='closed')===closed)));
-  root.querySelector('.mass-workflow').innerHTML=WorkflowSteps(['放入小杯','記錄初重','混合觀察','比較結果'],finished?4:p>0?2:baseline?2:added?1:0);
+  root.querySelector('.mass-workflow').innerHTML=WorkflowSteps(['準備裝置','記錄初重','混合觀察','讀取結果'],finished?3:baseline?2:ready?1:0);
   root.querySelector('.mass-readout').innerHTML='<div class="mass-notebook-heading"><b>本輪秤量紀錄</b><span>'+(closed?(collect?'密閉 · 氣體保留':'密閉 · 待接管'):'開放 · 氣體可離開')+'</span></div><div class="mass-reading-grid">'+metric('反應前整組質量',baseline?format(r.initial):'待記錄',baseline?'g':'')+metric(finished?'反應後整組質量':'目前整組質量',mixing?'量測中':format(r.reading),'g')+metric('離開秤盤的 CO₂',format(r.escaped),'g')+'</div><p class="mass-ledger-equation">'+(finished?'反應後 '+format(r.reading)+' g ＋ 離開的氣體 '+format(r.escaped)+' g ＝ 反應前 '+format(r.initial)+' g':baseline?'已記錄反應前質量；接著讓兩種材料接觸，觀察讀數。':'瓶子、材料、小杯、瓶塞、支架與集氣袋，都在這個秤盤內。')+'</p>'+(p>0?'<p class="mass-material-summary">已生成 CO₂ '+format(r.co2)+' g · 剩餘小蘇打 '+format(r.remaining[0].mass)+' g · 剩餘醋酸 '+format(r.remaining[1].mass)+' g</p>':'');
   root.querySelector('.mass-graph').innerHTML=massTrace(r.initial,r.reading,p);
   if(!added)guideStep(root,'拿取秤盤上的小蘇打小杯','點小杯或拖入反應瓶；小杯內的固體先與醋酸隔開。','.soda-token');
@@ -151,10 +158,19 @@ export function mountMass(root,ctx){
   else if(!baseline)guideStep(root,'先記錄反應前的天平讀數','裝置準備好後，按「記錄反應前讀數」。','.baseline-action');
   else if(running)guideStep(root,mixing?'傾斜反應瓶，讓材料接觸':'反應瓶已放回，觀察天平與氣體',closed?'氣體進入集氣袋，仍然在秤盤上。':'氣體從瓶口逸出，觀察天平減少多少。','.pause');
   else guideStep(root,p>0?'觀察已暫停':'讓兩種材料接觸，開始反應',p>0?'按「繼續觀察」，反應與讀數會接續。':'傾斜瓶子倒出小杯中的粉末，再把瓶子放穩讀值。','.mix-action');
+  const phase=finished?4:baseline?3:ready?2:1,next=root.querySelector('.lab-next');
+  root.querySelector('.lab-phase').textContent='STEP '+String(phase).padStart(2,'0')+' / 04';
+  const title=root.querySelector('.guide-title').textContent,detail=root.querySelector('.guide-detail').textContent;
+  if(root.querySelector('.lab-next-title').textContent!==title)root.querySelector('.lab-next-title').textContent=title;
+  if(root.querySelector('.lab-next-detail').textContent!==detail)root.querySelector('.lab-next-detail').textContent=detail;
+  next.textContent=running?'Ⅱ 暫停觀察':finished?'換成'+(closed?'開放':'密閉')+'裝置再試 →':!added?'放入小蘇打小杯 →':closed&&!collect?'接妥集氣管 →':!baseline?'記錄初重 '+format(r.initial)+' g →':p>0?'繼續觀察 →':'傾斜混合，開始觀察 →';
+  next.disabled=!valid()||r.extent===0;next.classList.toggle('is-observing',running);
+  root.querySelector('.material-dose-summary').textContent='小蘇打 '+format(soda)+' g · 醋酸 '+format(acid)+' g';
+  root.querySelector('.mass-workbench').dataset.phase=finished?'complete':running?'running':baseline?'weighed':'preparing';
  }
  function record(){
   root.querySelector('.mass-records').innerHTML=records.length?'<div class="table-scroll"><table><thead><tr><th>條件</th><th>小蘇打／醋酸</th><th>反應前</th><th>反應後</th><th>離開的氣體</th></tr></thead><tbody>'+records.map(r=>'<tr><td>'+(r.closed?'完整密閉':'開放')+'</td><td>'+format(r.soda)+' / '+format(r.acid)+' g</td><td>'+format(r.initial)+' g</td><td>'+format(r.reading)+' g</td><td>'+format(r.escaped)+' g</td></tr>').join('')+'</tbody></table></div>':'<p class="empty-record">先完成一輪實驗。相同條件與用量的結果只記錄一次。</p>';
-  const pair=matchedMassPair(records);root.querySelector('.pair-feedback').textContent=pair?'✓ 對照完成：開放時離開的 '+format(pair.open.escaped)+' g 氣體，在密閉時仍留在裝置裡。把氣體一起算入，總質量相同。':'保持小蘇打與醋酸用量相同，比較一次開放與一次密閉結果。';
+  const pair=matchedMassPair(records);root.querySelector('.pair-comparison').innerHTML=pair?'<div class="pair-card pair-open"><span>開放裝置</span><b>'+format(pair.open.initial)+' <i>→</i> '+format(pair.open.reading)+' <small>g</small></b><p>'+format(pair.open.escaped)+' g 氣體離開秤盤</p></div><div class="pair-card pair-closed"><span>密閉裝置</span><b>'+format(pair.closed.initial)+' <i>→</i> '+format(pair.closed.reading)+' <small>g</small></b><p>氣體留在裝置內，總質量相同</p></div>':'';root.querySelector('.pair-feedback').textContent=pair?'✓ 對照完成：開放時離開的 '+format(pair.open.escaped)+' g 氣體，在密閉時仍留在裝置裡。把氣體一起算入，總質量相同。':'保持小蘇打與醋酸用量相同，比較一次開放與一次密閉結果。';
  }
  function finish(){
   const r=state();if(r.extent<=0)return;const same=records.some(x=>x.closed===closed&&Math.abs(x.soda-soda)<1e-8&&Math.abs(x.acid-acid)<1e-8);
@@ -171,6 +187,7 @@ export function mountMass(root,ctx){
  function reset(){baseline=false;added=false;setSoda(soda);setAcid(acid);clock.reset();notice(root,'器材與用量已保留。重新放入小杯，記錄新的反應前讀數。');}
  function system(value){if(running)return;if(p>0)reset();closed=value;collect=false;baseline=false;draw();notice(root,closed?'已裝上瓶塞。放入小杯後，還要接妥集氣管。':'瓶口開放；瓶塞、管線與集氣袋仍放在秤盤上一起秤。');}
  function connect(){if(!closed||!added||running||p>0)return;collect=true;baseline=false;draw();notice(root,'集氣管已接妥，生成的氣體會留在集氣袋中。先記錄反應前質量。');}
+ root.querySelector('.lab-next').onclick=()=>{if(running){clock.pause();return;}if(p>=1){root.querySelector('.paired-trial').click();return;}if(!added){add();return;}if(closed&&!collect){connect();return;}if(!baseline){weigh();return;}begin();};
  root.querySelectorAll('[data-system]').forEach(b=>b.onclick=()=>system(b.dataset.system==='closed'));root.querySelector('.seal-action').onclick=()=>system(!closed);
  root.querySelector('.connect-action').onclick=connect;root.querySelector('.prepare-connection').onclick=connect;
  root.querySelector('.weigh').onclick=weigh;root.querySelector('.baseline-action').onclick=weigh;root.querySelector('.run').onclick=begin;root.querySelector('.mix-action').onclick=begin;

@@ -43,6 +43,8 @@ node --test tests/chemistry.test.mjs
 
 視覺精修包含深綠導覽、手札封面、五站探索地圖、卡片內四步導引、閱讀位置提示與實驗控制面板。樣式位於 `dist/chemistry/polish.css`，導引互動位於 `polish.js`；科學計算仍使用原有核心。
 
+互動工作台的樣式位於 `dist/chemistry/studio.css`，共用的放大操作模式位於 `studio.js`。分子組裝提供原子庫、組裝進度與即時加總；配平提供係數卡片與逐項原子核對；計量示範將投入量、產量與計算步驟分層呈現。質量守恆以當前步驟和主要操作按鈕引導，完成後並排比較同用量的開放、密閉結果。工作台可放大操作，返回課程後保留同一份操作狀態。
+
 執行 `node build-chemistry.mjs` 會將新樣式與導引一併打包到 `outputs/chemistry-adventure.html`，可以直接開啟離線操作。
 
 
