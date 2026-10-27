@@ -109,3 +109,23 @@
 .demo-atom-ledger{margin-top:20px;border:1px solid #dce3d0;border-radius:9px;overflow:hidden}.demo-atom-ledger>div{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:14px 17px;font-size:13px}.demo-atom-ledger>div+div{border-top:1px solid #e2e7d9}.demo-atom-ledger b{color:#50694a}.demo-atom-ledger span{color:#6c7f5c}.demo-atom-ledger strong{font-size:12px;text-align:right}.demo-atom-ledger .is-equal{background:#edf4e5}.demo-atom-ledger .is-equal strong{color:#547741}.demo-atom-ledger .is-mismatch{background:#faf2df}.demo-atom-ledger .is-mismatch strong{color:#9c7838}.demo-explanation{font-size:14px;line-height:2;color:#6b7d5c;margin:20px 0 0;min-height:56px}
 .balance-practice{margin:24px 0;border:1px solid #d1ddc4;border-radius:12px;background:#f6f9ef}.balance-practice>summary{padding:21px 23px;cursor:pointer;color:#3d5f3d;font-size:16px}.balance-practice>summary>span{display:block;margin:8px 0 0 19px;font-size:11px;color:#83916d}.balance-practice[open]>summary{border-bottom:1px solid #d7e2c9}.balance-studio .balance-practice .equation-workbench{border:0;border-radius:0 0 12px 12px;margin:0}
 @media(max-width:600px){.balance-demo-board{padding:20px 13px}.balance-demo-board h4{font-size:18px}.demo-equation{gap:4px;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr)}.demo-species{padding:15px 3px;gap:10px}.demo-species>b{font-size:25px}.demo-species em.is-changed{padding:2px 3px}.demo-operator{font-size:18px}.demo-species>small{font-size:10px}.demo-atom-ledger>div{grid-template-columns:1fr 1fr 1fr 1.2fr;padding:13px 9px;gap:5px;font-size:11px}.demo-atom-ledger strong{font-size:10px}.demo-explanation{font-size:12px}.balance-practice>summary{font-size:15px;padding:18px}}
+/* Reveal matched before/after observations only when a demonstration completes. */
+.reaction-comparison[hidden]{display:none!important}
+.reaction-comparison{margin:24px 0 18px;padding:24px;border:1px solid #bfcfb2;border-radius:14px;background:#f6f8ed}
+.reaction-comparison:not([hidden]){animation:reaction-comparison-reveal .45s ease-out both}
+.reaction-comparison-heading h4{margin:9px 0 6px;color:#30543d;font-size:20px;line-height:1.5}
+.reaction-comparison-heading p{margin:0 0 18px;font-size:12px;color:#718267;line-height:1.8}
+.reaction-comparison-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.reaction-comparison-pair figure{min-width:0;margin:0;border:1px solid #d1dcc6;border-radius:10px;overflow:hidden;background:#fffef6}
+.reaction-comparison-pair figure:last-child{border-color:#9fb78e}
+.reaction-comparison-label{display:flex;align-items:center;gap:10px;padding:13px 17px;background:#e9efdf;color:#496345}
+.reaction-comparison-label span{font:15px Georgia;color:#88976f}
+.reaction-comparison-pair figure:last-child .reaction-comparison-label{background:#315b40;color:#fffdeb}
+.reaction-comparison-pair figure:last-child .reaction-comparison-label span{color:#c4d3ad}
+.reaction-comparison-pair svg{display:block;width:100%;height:auto}
+.reaction-comparison-pair figcaption{padding:17px}
+.reaction-comparison-pair figcaption strong{font-size:14px;line-height:1.6;color:#345b3c}
+.reaction-comparison-pair figcaption p{margin:7px 0 0;font-size:12px;line-height:1.9;color:#6c7d61}
+@keyframes reaction-comparison-reveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.reaction-comparison{padding:15px}.reaction-comparison-heading h4{font-size:18px}.reaction-comparison-pair{grid-template-columns:1fr;gap:12px}}
+@media(prefers-reduced-motion:reduce){.reaction-comparison:not([hidden]){animation:none}}
