@@ -3,7 +3,7 @@ import { realisticReactionScene } from './reaction-scenes.js';
 import { reactionClock } from './components.js';
 import { prepareStudio } from './studio.js';
 export const demonstrations = [
- {id:'light',title:'發光與放熱',name:'鎂帶燃燒',before:'銀白色鎂帶，由坩堝鉗夾持在酒精燈上方。',during:'鎂帶燃燒，發出白光，並放出熱量。',after:'留下白色氧化鎂；這是與原來鎂帶不同的物質。',equation:'2Mg + O₂ → 2MgO',action:'點火，觀察鎂帶',product:'白色氧化鎂',note:'以柔和光暈代替實際強光；真實實驗勿直視燃燒的鎂。'},
+ {id:'light',title:'發光與放熱',name:'鎂帶燃燒',before:'銀白色鎂帶放在燃燒匙內，準備在酒精燈上方加熱。',during:'燃燒匙內的鎂帶燃燒，發出白光，並放出熱量。',after:'燃燒匙內留下白色氧化鎂；這是與原來鎂帶不同的物質。',equation:'2Mg + O₂ → 2MgO',action:'點火，觀察鎂帶',product:'白色氧化鎂',note:'以柔和光暈代替實際強光；真實實驗勿直視燃燒的鎂。'},
  {id:'color',title:'顏色改變',name:'含水硫酸銅受熱',before:'蒸發皿內有藍色的含水硫酸銅晶體。',during:'持續加熱，晶體逐漸失去結晶水，藍色轉淡。',after:'留下白色的無水硫酸銅，水以水蒸氣離開。',equation:'CuSO₄·5H₂O → CuSO₄ + 5H₂O',action:'加熱，觀察顏色',product:'白色無水硫酸銅',note:'反應條件：加熱。以淡色軌跡標示水蒸氣去向；水蒸氣本身無色。'},
  {id:'solid',title:'生成沉澱',name:'碳酸鈉溶液＋氯化鈣溶液',before:'兩種溶液原本都透明，還沒有接觸。',during:'兩種溶液接觸後，混合處逐漸出現白色混濁。',after:'生成不溶於水的碳酸鈣，白色固體逐漸沉降。',equation:'Na₂CO₃ + CaCl₂ → CaCO₃↓ + 2NaCl',action:'混合，觀察沉澱',product:'白色碳酸鈣沉澱',note:'沉降過程經過加速。CaCO₃ 是固體，NaCl 仍溶在水中。'},
  {id:'gas',title:'產生氣體',name:'石灰石＋稀鹽酸',before:'燒杯內是石灰石與少量水；滴管內是稀鹽酸。',during:'酸滴到石灰石，固體表面出現持續上升的氣泡。',after:'生成的二氧化碳離開液面；石灰石逐漸減少。',equation:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑',action:'滴入，觀察氣泡',product:'二氧化碳氣體',note:'石灰石示意為過量，反應後仍有剩餘；氣體身分需另行檢驗。'}
