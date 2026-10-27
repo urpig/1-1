@@ -39,7 +39,7 @@ export function realisticReactionScene(id,progress=0,instance='',practice=null){
    const isPour=pour?.id===key,t=isPour?pour.t:0,lift=ease(t,0,.28)*(1-ease(t,.82,1)),angle=(key==='sodium'?55:-55)*ease(t,.25,.38)*(1-ease(t,.8,.93));
    const moving=drag?.id===key&&drag.moved,dx=moving?drag.x-drag.start.x:(350-(x+35))*lift,dy=moving?drag.y-drag.start.y:-95*lift;
    const fluid=solutions.includes(key)?.2:.64-(isPour?flow*.44:0);
-   return '<g data-reagent="'+key+'" transform="translate('+dx+' '+dy+') rotate('+angle+' '+(x+35)+' 174)">'+beaker(key,x,174,70,171,fluid,'',angle,'100 mL')+text(x+35,142,label,20,accent)+text(x+35,162,formula,14,accent)+'</g>';
+   return '<g data-reagent="'+key+'" transform="translate('+dx+' '+dy+') rotate('+angle+' '+(x+35)+' 174)">'+beaker(key,x,174,70,171,fluid,'',angle,'100 mL')+(practice?'':text(x+35,142,label,20,accent)+text(x+35,162,formula,14,accent))+'</g>';
   }
   body=shadow(363,354,90)+beaker('mix',282,190,162,160,level,precip)+reagent('sodium',115,'碳酸鈉','Na₂CO₃(aq)','#4b7d91')+reagent('calcium',550,'氯化鈣','CaCl₂(aq)','#a27a3d')+(pour&&pour.t>.3&&pour.t<.8?'<path d="M350 82Q370 165 360 '+(yLevel+5)+'" stroke="#87afa9" stroke-width="8" fill="none" opacity=".75"/><path d="M348 82Q368 165 358 '+(yLevel+5)+'" stroke="#f4ffff" stroke-width="2" fill="none"/>':'')+text(363,390,p>0?'新物質：白色碳酸鈣沉澱':added===0?'空燒杯 · 加入兩種溶液':added===1?'只有一種溶液 · 還沒有沉澱':'兩種溶液已混合',18,'#edf4df')+text(363,418,'兩種溶液皆無色 · 依標籤辨認',12,'#c9dcca');
  }
