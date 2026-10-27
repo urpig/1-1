@@ -189,7 +189,7 @@ test('all reaction drawings retain resolvable materials and instrument reference
  }
 });
 
-import {createReactionPractice,addPracticeSolution,placePracticeDropper,addPracticeDrop,practiceReady} from '../dist/chemistry/reaction-practice.js';
+import {createReactionPractice,addPracticeSolution,placePracticeDropper,addPracticeDrop,practiceReady,PRACTICE_DROPS,bindDropperPress} from '../dist/chemistry/reaction-practice.js';
 test('precipitation requires both different solutions in either order; repeats never add a second dose',()=>{
  for(const order of [['sodium','calcium'],['calcium','sodium']]){
   const s=createReactionPractice();assert.ok(!practiceReady(s,'solid'));
@@ -198,11 +198,11 @@ test('precipitation requires both different solutions in either order; repeats n
   assert.ok(addPracticeSolution(s,order[1]));assert.ok(practiceReady(s,'solid'));assert.equal(s.solutions.length,2);
  }
 });
-test('acid is added one drop at a time only over the beaker and stops after three deliberate additions',()=>{
+test('acid is added one drop at a time only over the beaker and stops when the dropper is empty',()=>{
  const s=createReactionPractice();assert.ok(!addPracticeDrop(s));assert.equal(s.drops,0);
  placePracticeDropper(s,true);assert.ok(addPracticeDrop(s));assert.equal(s.drops,1);assert.ok(!practiceReady(s,'gas'));
  placePracticeDropper(s,false);assert.ok(!addPracticeDrop(s));assert.equal(s.drops,1);
- placePracticeDropper(s,true);assert.ok(addPracticeDrop(s));assert.ok(addPracticeDrop(s));assert.ok(practiceReady(s,'gas'));assert.ok(!addPracticeDrop(s));assert.equal(s.drops,3);
+ placePracticeDropper(s,true);for(let i=1;i<PRACTICE_DROPS;i++)assert.ok(addPracticeDrop(s));assert.ok(practiceReady(s,'gas'));assert.ok(!addPracticeDrop(s));assert.equal(s.drops,PRACTICE_DROPS);
  assert.deepEqual(createReactionPractice(),{solutions:[],dropperReady:false,drops:0});
 });
 test('manual apparatus states retain valid SVG references during additions and dropper movement',()=>{
@@ -214,4 +214,19 @@ test('manual apparatus states retain valid SVG references during additions and d
  }
  assert.ok(!realisticReactionScene('color',1).includes('未加熱樣品'));
  assert.ok(realisticReactionScene('color',1).includes('無水硫酸銅'));
+});
+
+test('holding the dropper pairs presses with release, cancellation and keyboard controls',()=>{
+ const handlers={},button={disabled:false,addEventListener:(name,fn)=>handlers[name]=fn,setPointerCapture(){},hasPointerCapture:()=>true,releasePointerCapture(){}};
+ let ready=false,held=false,starts=0,taps=0;
+ const release=bindDropperPress(button,{enabled:()=>ready,start:()=>{held=true;starts++;},stop:()=>held=false,tap:()=>taps++});
+ const e={button:0,pointerId:7,preventDefault(){}};
+ handlers.pointerdown(e);assert.equal(starts,0);ready=true;
+ handlers.pointerdown(e);assert.ok(held);assert.equal(starts,1);
+ handlers.pointerup({...e,pointerId:8});assert.ok(held);
+ handlers.pointerup(e);assert.ok(!held);handlers.click({detail:1});assert.equal(taps,0);
+ for(const name of ['pointercancel','lostpointercapture','blur']){handlers.pointerdown(e);handlers[name](e);assert.ok(!held);}
+ handlers.keydown({...e,key:' ',repeat:false});assert.ok(held);const n=starts;
+ handlers.keydown({...e,key:' ',repeat:true});assert.equal(starts,n);handlers.keyup({...e,key:' '});assert.ok(!held);
+ handlers.pointerdown(e);release();assert.ok(!held);handlers.click({detail:0});assert.equal(taps,1);
 });
