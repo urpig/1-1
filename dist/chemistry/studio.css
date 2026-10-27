@@ -129,3 +129,24 @@
 @keyframes reaction-comparison-reveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.reaction-comparison{padding:15px}.reaction-comparison-heading h4{font-size:18px}.reaction-comparison-pair{grid-template-columns:1fr;gap:12px}}
 @media(prefers-reduced-motion:reduce){.reaction-comparison:not([hidden]){animation:none}}
+/* Instruments are direct manipulation targets; text buttons provide keyboard alternatives. */
+.phenomena-studio [hidden]{display:none!important}
+.reaction-interactive-scene{position:relative;isolation:isolate;touch-action:pan-y}
+.reaction-interactive-scene .reaction-art svg{width:100%;height:auto!important;max-height:none}
+.reaction-instruments{position:absolute;inset:0;pointer-events:none}
+.reaction-instruments button{pointer-events:auto;position:absolute;background:transparent;border:2px solid transparent;box-shadow:none;border-radius:12px;cursor:grab;touch-action:none;padding:0;color:#31583f}
+.reaction-instruments button:hover,.reaction-instruments button:focus-visible{border-color:#bd9f57;background:#fff9d414;outline:2px solid #fff8da;outline-offset:2px}
+.reaction-instruments button:active{cursor:grabbing}
+.reaction-instruments button:disabled{opacity:.4;cursor:default;pointer-events:none}
+.reagent-grab{top:36%;width:17%;height:45%}.sodium-grab{left:11%}.calcium-grab{left:68%}
+.reagent-grab>span{position:absolute;left:0;right:0;top:-23px;font-size:12px;font-weight:700;background:#fffdf2;border:1px solid #b6c8b1;border-radius:5px;padding:5px}
+.reagent-grab>small{position:absolute;left:-5%;width:110%;bottom:-20px;font-size:10px;color:#f1f7e5;text-shadow:0 1px 3px #274536}
+.dropper-grab{width:5%;height:41%}
+.dropper-grab>span{position:absolute;left:100%;top:4%;white-space:nowrap;font-size:11px;border:1px solid #b9cda7;border-radius:5px;padding:6px;background:#fffef2;color:#34583c}
+.reaction-drop-target{position:absolute;left:36%;top:40%;width:23%;height:20%;border:2px dashed #d5b66c;border-radius:12px;background:#fff1bc33;display:grid;place-items:center;font-size:12px;color:#436140;font-weight:700}
+.hands-on-hint{font-size:11px;line-height:1.8;color:#48644d;margin:0;padding:12px 16px;background:#eef3e4;border-top:1px solid #c9d7c3}
+.practice-controls{margin:8px 0 12px}.solution-actions{display:grid;gap:10px}.solution-actions button,.position-dropper{padding:12px 10px;border:1px solid #bccdb0;border-radius:8px;background:#f2f6e9;color:#36573d;font-size:12px;line-height:1.7;text-align:left}
+.solution-actions button:first-child{border-left:5px solid #4b7d91}.solution-actions button:last-child{border-left:5px solid #a27a3d}
+.practice-controls button:disabled{opacity:.55;cursor:default}.dropper-actions{display:grid;gap:9px}.drop-count{margin:0 0 4px;color:#55734d;font-size:13px;font-weight:600}.dropper-actions .primary{min-height:46px;font-size:13px}.position-dropper{text-align:center}
+@media(max-width:1050px){.reaction-notes>.practice-controls{grid-column:1;grid-row:4}.reaction-notes:has(.practice-controls:not([hidden])) .demonstrate{grid-row:5}.reaction-notes:has(.practice-controls:not([hidden])) .reaction-rewind{grid-row:6}}
+@media(max-width:600px){.reagent-grab>span{font-size:10px;padding:3px;top:-20px}.reagent-grab>small{font-size:8px;bottom:-14px}.dropper-grab>span{font-size:9px;padding:4px}.hands-on-hint{font-size:10px;padding:10px}.reaction-drop-target{font-size:10px}}

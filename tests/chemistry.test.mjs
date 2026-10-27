@@ -188,3 +188,30 @@ test('all reaction drawings retain resolvable materials and instrument reference
   assert.equal(realisticReactionScene(id,2),realisticReactionScene(id,1));
  }
 });
+
+import {createReactionPractice,addPracticeSolution,placePracticeDropper,addPracticeDrop,practiceReady} from '../dist/chemistry/reaction-practice.js';
+test('precipitation requires both different solutions in either order; repeats never add a second dose',()=>{
+ for(const order of [['sodium','calcium'],['calcium','sodium']]){
+  const s=createReactionPractice();assert.ok(!practiceReady(s,'solid'));
+  assert.ok(!addPracticeSolution(s,'unknown'));assert.ok(addPracticeSolution(s,order[0]));assert.ok(!practiceReady(s,'solid'));
+  assert.ok(!addPracticeSolution(s,order[0]));assert.equal(s.solutions.length,1);
+  assert.ok(addPracticeSolution(s,order[1]));assert.ok(practiceReady(s,'solid'));assert.equal(s.solutions.length,2);
+ }
+});
+test('acid is added one drop at a time only over the beaker and stops after three deliberate additions',()=>{
+ const s=createReactionPractice();assert.ok(!addPracticeDrop(s));assert.equal(s.drops,0);
+ placePracticeDropper(s,true);assert.ok(addPracticeDrop(s));assert.equal(s.drops,1);assert.ok(!practiceReady(s,'gas'));
+ placePracticeDropper(s,false);assert.ok(!addPracticeDrop(s));assert.equal(s.drops,1);
+ placePracticeDropper(s,true);assert.ok(addPracticeDrop(s));assert.ok(addPracticeDrop(s));assert.ok(practiceReady(s,'gas'));assert.ok(!addPracticeDrop(s));assert.equal(s.drops,3);
+ assert.deepEqual(createReactionPractice(),{solutions:[],dropperReady:false,drops:0});
+});
+test('manual apparatus states retain valid SVG references during additions and dropper movement',()=>{
+ const s=createReactionPractice();
+ for(const id of ['solid','gas'])for(const t of [0,.25,.5,.9,1]){
+  const svg=realisticReactionScene(id,t,'manual-test',{...s,pour:{id:'sodium',t},dropper:{x:368,y:221},gasPulse:t});
+  assert.ok(!/NaN|undefined|Infinity/.test(svg));const ids=[...svg.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(ids.length,new Set(ids).size);
+  for(const m of svg.matchAll(/url\(#([^)]+)\)/g))assert.ok(ids.includes(m[1]));
+ }
+ assert.ok(!realisticReactionScene('color',1).includes('未加熱樣品'));
+ assert.ok(realisticReactionScene('color',1).includes('無水硫酸銅'));
+});
