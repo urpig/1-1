@@ -3,8 +3,8 @@ const clamp=n=>Math.max(0,Math.min(1,n));
 const ease=(p,a,b)=>{const t=clamp((p-a)/(b-a));return t*t*(3-2*t);};
 const mix=(a,b,t)=>'#'+[0,2,4].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0')).join('');
 const titles={light:'鎂帶燃燒',color:'五水硫酸銅受熱',solid:'碳酸鈉溶液與氯化鈣溶液混合',gas:'石灰石與稀鹽酸反應'};
-export function realisticReactionScene(id,progress=0){
- const p=clamp(progress),prefix='real-'+id,active=p>0&&p<1,ref=name=>'url(#'+prefix+'-'+name+')';
+export function realisticReactionScene(id,progress=0,instance=''){
+ const p=clamp(progress),prefix='real-'+id+(instance?'-'+instance:''),active=p>0&&p<1,ref=name=>'url(#'+prefix+'-'+name+')';
  const text=(x,y,t,size=12,color='#567267',anchor='middle')=>'<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" fill="'+color+'" font-family="system-ui,sans-serif" font-size="'+size+'">'+t+'</text>';
  const line=(x,y,tx,ty,t)=>'<path d="M'+x+' '+y+'H'+(x+18)+'L'+tx+' '+ty+'" fill="none" stroke="#9aafa0" stroke-width="1"/><circle cx="'+tx+'" cy="'+ty+'" r="2" fill="#9aafa0"/>'+text(x-5,y+4,t,11,'#536e61','end');
  const shadow=(x,y,rx,ry=8)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#162e24" opacity=".22" filter="'+ref('soft')+'"/>';
