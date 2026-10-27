@@ -155,3 +155,36 @@ test('mass display includes unused material in the final total, including oxygen
  const html=labMassComparison('magnesium',[2.4,3.2],react('magnesium',[2.4,3.2],1),1);
  assert.ok(html.includes('產物 4 g ＋ 剩餘材料 1.6 g'));assert.ok(html.includes('2.4 g ＋ 結合的氧氣 1.6 g'));
 });
+
+test('foundation question distinguishes oxygen atoms from molecules and resets the answer', async()=>{
+ const {mountFoundationCheck}=await import('../dist/chemistry/lesson-intro.js');
+ const buttons=[1,16,32].map(value=>({dataset:{atomicMass:String(value)},attrs:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(type,fn){this.click=fn;}}));
+ const feedback={dataset:{},textContent:''};
+ const root={querySelectorAll(){return buttons;},querySelector(){return feedback;}};
+ const check=mountFoundationCheck(root);
+ buttons[2].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('O₂'));
+ buttons[1].click();assert.equal(feedback.dataset.correct,'true');assert.ok(feedback.textContent.includes('16 g'));assert.equal(buttons.filter(b=>b.attrs['aria-pressed']==='true').length,1);
+ buttons[0].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('氫原子'));
+ check.reset();assert.equal(feedback.dataset.correct,undefined);assert.ok(buttons.every(b=>b.attrs['aria-pressed']==='false'));
+});
+import {balanceDemonstrationSteps} from '../dist/chemistry/balance-demo.js';
+import {realisticReactionScene} from '../dist/chemistry/reaction-scenes.js';
+test('worked balancing example fixes oxygen first, then hydrogen without changing the molecules',()=>{
+ const ledgers=balanceDemonstrationSteps.map(s=>atomLedger('water',s.coeff));
+ assert.deepEqual(ledgers[0].rows,[{e:'H',left:2,right:2},{e:'O',left:2,right:1}]);
+ assert.deepEqual(ledgers[1].rows,[{e:'H',left:2,right:4},{e:'O',left:2,right:2}]);
+ assert.ok(ledgers[2].balanced&&ledgers[2].minimal);
+});
+test('all reaction drawings retain resolvable materials and instrument references throughout playback',()=>{
+ for(const id of ['light','color','solid','gas']){
+  for(const p of [0,.1,.3,.5,.8,1]){
+   const svg=realisticReactionScene(id,p),ids=[...svg.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+   assert.equal(new Set(ids).size,ids.length,id+' has duplicate SVG ids');
+   for(const ref of svg.matchAll(/url\(#([^)]+)\)/g))assert.ok(ids.includes(ref[1]),ref[1]);
+   assert.ok(!/NaN|Infinity|undefined/.test(svg),id+' has invalid geometry');
+  }
+  assert.notEqual(realisticReactionScene(id,0),realisticReactionScene(id,1));
+  assert.equal(realisticReactionScene(id,-1),realisticReactionScene(id,0));
+  assert.equal(realisticReactionScene(id,2),realisticReactionScene(id,1));
+ }
+});
