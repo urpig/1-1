@@ -22,7 +22,7 @@ export function mountPhenomena(root,ctx){
  const q=s=>root.querySelector(s),qa=s=>root.querySelectorAll(s);
  function draw(){
   const d=demonstrations[selected],manual=d.id==='solid'||d.id==='gas';
-  const phase=p===1?'反應後':busy||running?'反應中':p>0?(d.id==='gas'?'等待下一滴':'已暫停'):manual?'準備材料':'反應前';
+  const phase=p===1?'反應後':busy&&d.id==='solid'?'加入溶液中':busy||running?'反應中':p>0?(d.id==='gas'?'等待下一滴':'已暫停'):manual?'準備材料':'反應前';
   const comparison=q('.reaction-comparison');
   if(p===1&&comparison.dataset.reaction!==d.id){comparison.innerHTML=reactionComparison(d);comparison.dataset.reaction=d.id;}
   comparison.hidden=p!==1;
@@ -75,12 +75,12 @@ export function mountPhenomena(root,ctx){
  qa('[data-practice-tool]').forEach(b=>{
   const tool=b.dataset.practiceTool;
   b.onclick=()=>{if(suppressClick){suppressClick=false;return;}if(tool==='dropper'){if(practice.dropperReady)squeeze();else positionDropper();}else addSolution(tool);};
-  b.onpointerdown=e=>{if(e.button!==0||b.disabled)return;const at=scenePoint(e);drag={id:tool,start:at,x:at.x,y:at.y,origin:{...dropper},moved:false};b.setPointerCapture(e.pointerId);};
+  b.onpointerdown=e=>{if(e.button!==0||b.disabled)return;suppressClick=false;const at=scenePoint(e);drag={id:tool,start:at,x:at.x,y:at.y,origin:{...dropper},moved:false};b.setPointerCapture(e.pointerId);};
   b.onpointermove=e=>{if(!drag||drag.id!==tool||!b.hasPointerCapture(e.pointerId))return;const at=scenePoint(e);drag.x=at.x;drag.y=at.y;drag.moved=drag.moved||Math.hypot(at.x-drag.start.x,at.y-drag.start.y)>5;if(!drag.moved)return;if(tool==='dropper')dropper={x:Math.max(25,Math.min(735,drag.origin.x+at.x-drag.start.x)),y:Math.max(180,Math.min(380,drag.origin.y+at.y-drag.start.y))};draw();};
   b.onpointerup=e=>{if(!drag||drag.id!==tool)return;const at=scenePoint(e),moved=drag.moved;drag=null;if(b.hasPointerCapture(e.pointerId))b.releasePointerCapture(e.pointerId);if(!moved)return;suppressClick=true;if(tool==='dropper'){const inside=dropper.x>=292&&dropper.x<=442&&dropper.y>=175&&dropper.y<=260;placePracticeDropper(practice,inside);dropper=inside?{x:368,y:221}:{x:583,y:221};draw();}else{draw();if(at.x>=270&&at.x<=460&&at.y>=145&&at.y<=355)addSolution(tool);}setTimeout(()=>{suppressClick=false;},0);};
-  b.onpointercancel=()=>{drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();};
-  b.onlostpointercapture=()=>{if(drag?.id===tool){drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();}};
+  b.onpointercancel=()=>{suppressClick=true;drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();};
+  b.onlostpointercapture=()=>{if(drag?.id===tool){suppressClick=true;drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();}};
  });
- root.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag){drag=null;dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();}});
+ root.addEventListener('keydown',e=>{if(e.key==='Escape'&&drag){suppressClick=true;drag=null;dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();}});
  draw();return{reset(){seen.clear();selected=0;reset();}};
 }
