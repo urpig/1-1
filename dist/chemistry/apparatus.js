@@ -15,7 +15,7 @@ export function labBody(id,{progress=0,amount=1,product=0,added=false,second=fal
   s+='<path d="M490 79V329M446 329H542" stroke="url(#steel)" stroke-width="10" stroke-linecap="round"/><ellipse cx="494" cy="335" rx="68" ry="10" fill="#82978b" opacity=".2"/><g transform="translate(371 158) rotate(-19)"><path d="M-124 -22H127V22H-124Q-151 0 -124 -22Z" fill="url(#clear-glass)" stroke="#799da2" stroke-width="2.5"/><ellipse cx="127" rx="5" ry="22" fill="#f9fffc" stroke="#799da2"/><path d="M-124 -13H114" stroke="#fff" stroke-opacity=".9" stroke-width="4"/>';
   if(added&&amount>0)s+='<path d="M-124 11L-113 -1 -101 7 -89 -4 -75 5 -60 0 -47 14V19H-124Z" fill="#4f9bd3" opacity="'+(1-conversion)+'" data-solid="hydrate"/><path d="M-124 11L-113 -1 -101 7 -89 -4 -75 5 -60 0 -47 14V19H-124Z" fill="#fdfdf3" opacity="'+conversion+'" data-solid="anhydrous"/>';
   if(progress>0)s+='<circle cx="61" cy="-13" r="2.5" fill="#b2d1d2"/><circle cx="90" cy="-13" r="2" fill="#b2d1d2"/>';
-  s+='</g><path d="M492 139H446M441 130Q455 141 445 153" stroke="#7c8e88" stroke-width="7" fill="none" stroke-linecap="round"/>'+spiritLamp(268,265,heat&&progress<1)+t(500,95,'管口保持開放',12)+t(282,376,progress>0?'藍色晶體逐漸轉白':'藍色的五水硫酸銅',14);
+  s+='</g><path d="M492 139H446M441 130Q455 141 445 153" stroke="#7c8e88" stroke-width="7" fill="none" stroke-linecap="round"/>'+spiritLamp(268,265,heat&&progress<1)+t(500,95,'管口保持開放',12)+t(282,376,progress>0?'藍色晶體逐漸轉白':'藍色的含水硫酸銅',14);
   if(progress>0)s+=t(575,189,'水蒸氣無色',12)+t(575,209,'冷端可見凝結水珠',11,'#83978a');
  }else{
   const liquid=(id==='precipitate'?(added?.25:0)+(second?.25:0):(second?.5:0));

@@ -30,7 +30,7 @@ water:{name:'氫氣與氧氣',left:['H2','O2'],right:['H2O'],coeff:[2,1,2],state
 magnesium:{name:'鎂的燃燒',left:['Mg','O2'],right:['MgO'],coeff:[2,1,2],states:['s','g','s']},
 iron:{name:'鐵與氧氣（氧化鐵模型）',left:['Fe','O2'],right:['Fe2O3'],coeff:[4,3,2],states:['s','g','s']},
 peroxide:{name:'過氧化氫分解',left:['H2O2'],right:['H2O','O2'],coeff:[2,2,1],states:['aq','l','g']},
-hydrate:{name:'五水硫酸銅受熱',left:['CuSO4·5H2O'],right:['CuSO4','H2O'],coeff:[1,1,5],states:['s','s','g']},
+hydrate:{name:'含水硫酸銅受熱',left:['CuSO4·5H2O'],right:['CuSO4','H2O'],coeff:[1,1,5],states:['s','s','g']},
 precipitate:{name:'碳酸鈣沉澱',left:['Na2CO3','CaCl2'],right:['NaCl','CaCO3'],coeff:[1,1,2,1],states:['aq','aq','aq','s']},
 limestone:{name:'石灰石與鹽酸',left:['CaCO3','HCl'],right:['CaCl2','H2O','CO2'],coeff:[1,2,1,1,1],states:['s','aq','aq','l','g']},
 vinegar:{name:'小蘇打與醋酸',left:['NaHCO3','CH3COOH'],right:['CH3COONa','H2O','CO2'],coeff:[1,1,1,1,1],states:['s','aq','aq','l','g']}};

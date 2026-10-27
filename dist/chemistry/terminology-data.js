@@ -1206,7 +1206,7 @@ export const scienceTerms=[
   },
   {
     "id": "hydrate",
-    "label": "五水硫酸銅",
+    "label": "含水硫酸銅",
     "definition": "CuSO₄·5H₂O；含結晶水的藍色晶體。",
     "example": "充分加熱後失去結晶水，形成白色的無水硫酸銅。",
     "note": "",
@@ -1223,7 +1223,7 @@ export const scienceTerms=[
     "id": "coppersulfate",
     "label": "無水硫酸銅",
     "definition": "CuSO₄；不含結晶水的硫酸銅。",
-    "example": "本章用藍色五水硫酸銅失水、形成白色無水硫酸銅來觀察變化。",
+    "example": "本章用藍色含水硫酸銅失水、形成白色無水硫酸銅來觀察變化。",
     "note": "",
     "unit": "",
     "aliases": [
