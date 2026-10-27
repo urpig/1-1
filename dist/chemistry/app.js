@@ -1,5 +1,5 @@
 import { mountPhenomena } from './phenomena.js';
-import { foundationLesson, equationLesson } from './lesson-intro.js';
+import { foundationLesson, equationLesson, mountFoundationCheck } from './lesson-intro.js';
 import { mountPolish } from './polish.js';
 import { handoutPractice } from './handout-practice-data.js';
 import { TermPrimer, mountTerminology } from './terminology.js';
@@ -80,6 +80,7 @@ function bindQuiz(c,el,activitySelector='.activity'){
  if(state.answers[c.id]!==undefined&&state.observed.includes(c.id))QuizFeedback(c,el,state.answers[c.id],activitySelector);
 }
 render();
+const foundationCheck=mountFoundationCheck(document.querySelector('.foundation-lesson'));
 for(const c of cards){
  const el=document.querySelector('#chem-'+c.id);
  function predict(){
@@ -105,7 +106,7 @@ for(const c of cards){
  el.querySelector('.reset-card').onclick=()=>{
   const ids=[c.id,...c.extras.map(id=>'extra-'+id)];state.observed=state.observed.filter(id=>!ids.includes(id));
   ids.forEach(id=>delete state.answers[id]);if(c.id!==1)delete state.predictions[c.id];
-  activities.get(c.id)?.reset();c.extras.forEach(id=>extraActivities.get(id)?.reset());
+  activities.get(c.id)?.reset();if(c.id===3)foundationCheck.reset();c.extras.forEach(id=>extraActivities.get(id)?.reset());
   el.querySelectorAll('.science-explanation,.supporting-explanation').forEach(x=>x.hidden=true);
   el.querySelectorAll('.quiz-lock').forEach(x=>x.hidden=false);
   el.querySelectorAll('.quiz fieldset').forEach(x=>x.disabled=true);

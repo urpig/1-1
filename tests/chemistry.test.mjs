@@ -155,3 +155,15 @@ test('mass display includes unused material in the final total, including oxygen
  const html=labMassComparison('magnesium',[2.4,3.2],react('magnesium',[2.4,3.2],1),1);
  assert.ok(html.includes('產物 4 g ＋ 剩餘材料 1.6 g'));assert.ok(html.includes('2.4 g ＋ 結合的氧氣 1.6 g'));
 });
+
+test('foundation question distinguishes oxygen atoms from molecules and resets the answer', async()=>{
+ const {mountFoundationCheck}=await import('../dist/chemistry/lesson-intro.js');
+ const buttons=[1,16,32].map(value=>({dataset:{atomicMass:String(value)},attrs:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(type,fn){this.click=fn;}}));
+ const feedback={dataset:{},textContent:''};
+ const root={querySelectorAll(){return buttons;},querySelector(){return feedback;}};
+ const check=mountFoundationCheck(root);
+ buttons[2].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('O₂'));
+ buttons[1].click();assert.equal(feedback.dataset.correct,'true');assert.ok(feedback.textContent.includes('16 g'));assert.equal(buttons.filter(b=>b.attrs['aria-pressed']==='true').length,1);
+ buttons[0].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('氫原子'));
+ check.reset();assert.equal(feedback.dataset.correct,undefined);assert.ok(buttons.every(b=>b.attrs['aria-pressed']==='false'));
+});
