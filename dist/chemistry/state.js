@@ -5,6 +5,7 @@ export function cleanData(raw){
  const pick=(key,allowed)=>{out[key]=Array.isArray(x[key])?[...new Set(x[key].filter(v=>allowed.includes(v)))]:[];};
  pick('labDone',['magnesium','hydrate','precipitate','limestone']);pick('balanced',['water','magnesium','iron','peroxide']);
  pick('finalEvidence',[0,1,2,3]);pick('comparisons',['ice','rust','stone']);pick('practiceSolved',[0,1,2,3,4,5,6]);pick('stoichLevels',[1,2,3]);pick('handoutSolved',handoutPractice.map(q=>q.id));
+ pick('phenomenaSeen',['light','color','solid','gas']);out.moleculeAssembled=x.moleculeAssembled===true;
  const safe=(n,max)=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=max;
  out.labRecords=(Array.isArray(x.labRecords)?x.labRecords:[]).filter(r=>r&&out.labDone.includes(r.id)&&safe(r.dose,12)&&safe(r.partner,15)).slice(-8).map(r=>({id:r.id,dose:r.dose,partner:r.partner,observation:{magnesium:'發光、放熱，形成白色 MgO',hydrate:'藍色轉白，失去結晶水',precipitate:'生成白色 CaCO₃ 沉澱',limestone:'生成無色 CO₂ 氣體'}[r.id],products:react(r.id,r.id==='hydrate'?[r.dose]:[r.dose,r.partner]).products}));
  out.massRecords=(Array.isArray(x.massRecords)?x.massRecords:[]).filter(r=>r&&safe(r.soda,16.8)&&safe(r.acid,12)).slice(-10).map(r=>{const v=conservation({soda:r.soda,acid:r.acid,closed:r.closed===true});return{soda:r.soda,acid:r.acid,closed:r.closed===true,initial:v.initial,reading:v.reading,escaped:v.escaped};});

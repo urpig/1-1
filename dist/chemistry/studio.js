@@ -8,12 +8,14 @@ export function prepareStudio(root,{number,title,description},ctx){
  heading.querySelector('button').onclick=()=>{
 
   const dialog=document.createElement('dialog');dialog.className='studio-dialog';dialog.setAttribute('aria-label',title+' · 放大操作台');
-  dialog.innerHTML='<div class="studio-dialog-bar"><div><span class="studio-eyebrow">專注操作</span><b>'+escapeHTML(title)+'</b></div><button type="button" class="studio-close" autofocus>完成，回到課程 <span aria-hidden="true">×</span></button></div><div class="studio-dialog-body"></div>';
-  const content=[...root.children].filter(x=>x!==heading),placeholders=content.map(node=>{const marker=document.createComment('studio position');node.before(marker);return marker;});
+  dialog.innerHTML='<div class="studio-dialog-bar"><div><span class="studio-eyebrow">專注操作</span><b>'+escapeHTML(title)+'</b></div><button type="button" class="studio-close" autofocus>返回課程 <span aria-hidden="true">×</span></button></div><div class="studio-dialog-body"></div>';
+  const prediction=root.closest('.learning-card')?.querySelector('.prediction');
+  const content=[...(prediction?[prediction]:[]),...[...root.children].filter(x=>x!==heading)],placeholders=content.map(node=>{const marker=document.createComment('studio position');node.before(marker);return marker;});
   root.append(dialog);content.forEach(node=>dialog.querySelector('.studio-dialog-body').append(node));
   root.classList.add('is-expanded');
   const overflow=document.body.style.overflow;document.body.style.overflow='hidden';
   dialog.onclose=()=>{root.dispatchEvent(new Event('workspaceclose'));root.classList.remove('is-expanded');content.forEach((node,i)=>placeholders[i].replaceWith(node));dialog.remove();document.body.style.overflow=overflow;heading.querySelector('button').focus({preventScroll:true});};
   dialog.querySelector('.studio-close').onclick=()=>dialog.close();dialog.showModal();
+  if(prediction&&!prediction.querySelector('[aria-pressed="true"]'))prediction.querySelector('button')?.focus();
  };
 }

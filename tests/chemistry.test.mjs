@@ -230,3 +230,96 @@ test('holding the dropper pairs presses with release, cancellation and keyboard 
  handlers.keydown({...e,key:' ',repeat:true});assert.equal(starts,n);handlers.keyup({...e,key:' '});assert.ok(!held);
  handlers.pointerdown(e);release();assert.ok(!held);handlers.click({detail:0});assert.equal(taps,1);
 });
+
+
+import {activityProgress,activityComplete,mainMastered} from '../dist/chemistry/learning-progress.js';
+import {reactionComparison,demonstrations} from '../dist/chemistry/phenomena.js';
+import {prepareStudio} from '../dist/chemistry/studio.js';
+test('main stations need a prediction, actual activity evidence and a correct answer; extensions are optional',()=>{
+ const data={moleculeAssembled:true,phenomenaSeen:['light','color','solid','gas'],balanced:['water','magnesium','iron','peroxide'],stoichLevels:[1,2,3],massRecords:[{soda:4.2,acid:6,closed:false},{soda:4.2,acid:6,closed:true}]};
+ const state={data,observed:[],predictions:{},answers:{}};
+ for(const card of cards){
+  assert.ok(activityComplete(card.id,data));assert.ok(!mainMastered(card,state));
+  state.answers[card.id]=card.quiz.answer;assert.ok(!mainMastered(card,state));
+  state.predictions[card.id]=0;assert.ok(mainMastered(card,state));
+ }
+ assert.ok(cards.every(card=>mainMastered(card,state)));
+ assert.equal(data.handoutSolved,undefined);assert.equal(data.finalReason,undefined);
+ const old={data:{},observed:cards.map(c=>c.id),predictions:state.predictions,answers:state.answers};
+ assert.ok(cards.every(card=>!mainMastered(card,old)),'legacy page-open flags must not unlock stations');
+});
+test('activity counters ignore duplicate observations and only accept matching positive mass trials',()=>{
+ assert.equal(activityProgress(1,{phenomenaSeen:['gas','gas','unknown']}).done,1);
+ assert.ok(!activityComplete(1,{phenomenaSeen:['light','color','solid']}));
+ assert.equal(activityProgress(4,{balanced:['water','water']}).done,1);
+ assert.ok(!activityComplete(5,{stoichLevels:[1,2]}));
+ assert.ok(!activityComplete(3,{moleculeAssembled:'true'}));
+ assert.ok(!activityComplete(2,{massRecords:[{soda:0,acid:6,closed:false},{soda:0,acid:6,closed:true}]}));
+ assert.equal(activityProgress(2,{massRecords:[{soda:4.2,acid:6,closed:false},{soda:8.4,acid:6,closed:true}]}).done,1);
+});
+test('student evidence survives reload and removes malformed saved values',()=>{
+ const saved=cleanData({moleculeAssembled:true,phenomenaSeen:['gas','gas','bad','solid'],stoichLevels:[1,2],balanced:['water']});
+ const restored=cleanData(JSON.parse(JSON.stringify(saved)));
+ assert.equal(restored.moleculeAssembled,true);assert.deepEqual(restored.phenomenaSeen,['gas','solid']);
+ assert.equal(activityProgress(1,restored).done,2);assert.equal(activityProgress(5,restored).done,2);
+ assert.equal(cleanData({moleculeAssembled:'true',phenomenaSeen:'gas'}).moleculeAssembled,false);
+ assert.deepEqual(cleanData({phenomenaSeen:'gas'}).phenomenaSeen,[]);
+});
+test('one acid drop can show an honest in-progress comparison with two numbered panels',()=>{
+ const markup=reactionComparison(demonstrations.find(d=>d.id==='gas'),1/PRACTICE_DROPS);
+ assert.ok(markup.includes('滴入鹽酸後 · 觀察中'));assert.ok(markup.includes('<span>01</span>'));assert.ok(markup.includes('<span>02</span>'));
+ assert.equal((markup.match(/<figure>/g)||[]).length,2);assert.ok(!markup.includes('NaN'));
+});
+test('enlarging a workspace keeps prediction controls inside the modal and restores their identity on close',()=>{
+ // Minimal DOM fixture tests node ownership and restoration, not visual layout.
+ class Node {
+  constructor(name){this.name=name;this.children=[];this.style={};this.attrs={};this.classes=new Set();this.classList={add:x=>this.classes.add(x),remove:x=>this.classes.delete(x)};}
+  setAttribute(k,v){this.attrs[k]=v;}
+  append(...nodes){for(const node of nodes){node.detach();node.parent=this;this.children.push(node);}}
+  prepend(node){node.detach();node.parent=this;this.children.unshift(node);}
+  detach(){if(this.parent){this.parent.children.splice(this.parent.children.indexOf(this),1);this.parent=null;}}
+  before(node){const parent=this.parent;node.detach();node.parent=parent;parent.children.splice(parent.children.indexOf(this),0,node);}
+  replaceWith(node){const parent=this.parent;node.detach();parent.children.splice(parent.children.indexOf(this),1,node);node.parent=parent;this.parent=null;}
+  remove(){this.detach();}
+  focus(){focused=this;}
+  dispatchEvent(event){events.push(event.type);}
+  closest(){return card;}
+  set innerHTML(value){this.markup=value;if(this.name==='header'){this.append(new Node('button'));}if(this.name==='dialog'){const close=new Node('button');close.className='studio-close';const body=new Node('div');body.className='studio-dialog-body';this.append(close,body);}}
+  querySelector(selector){if(selector==='[aria-pressed="true"]')return null;return this.children.find(n=>selector==='button'?n.name==='button':n.className===selector.slice(1))||null;}
+  showModal(){this.open=true;}
+  close(){this.open=false;this.onclose();}
+ }
+ const previous=globalThis.document;let focused=null;const events=[];
+ const card=new Node('card'),prediction=new Node('prediction'),choice=new Node('button'),root=new Node('root'),activity=new Node('activity');
+ prediction.className='prediction';prediction.append(choice);root.append(activity);card.append(prediction,root);
+ globalThis.document={createElement:name=>new Node(name),createComment:()=>new Node('comment'),body:{style:{overflow:'auto'}}};
+ try{
+  prepareStudio(root,{number:'01',title:'分子組裝室',description:'組裝'},{});
+  const heading=root.children[0],open=heading.querySelector('button');
+  for(let cycle=0;cycle<2;cycle++){
+   open.onclick();const dialog=root.children.find(n=>n.name==='dialog'),body=dialog.querySelector('.studio-dialog-body');
+   assert.equal(prediction.parent,body);assert.equal(activity.parent,body);assert.equal(prediction.children[0],choice);assert.equal(focused,choice);assert.equal(globalThis.document.body.style.overflow,'hidden');
+   dialog.close();assert.deepEqual(card.children,[prediction,root]);assert.deepEqual(root.children,[heading,activity]);assert.equal(focused,open);assert.equal(globalThis.document.body.style.overflow,'auto');
+  }
+  assert.deepEqual(events,['workspaceclose','workspaceclose']);
+ }finally{globalThis.document=previous;}
+});
+
+test('foundation presents one concept at a time and leads into the prediction without losing the embedded question',async()=>{
+ const {mountFoundationSteps}=await import('../dist/chemistry/lesson-intro.js');
+ const previous=globalThis.document;let focused=null,scrolled=null;
+ const make=()=>({children:[],attrs:{},classList:{add(){}},setAttribute(k,v){this.attrs[k]=v;},append(...nodes){this.children.push(...nodes);},before(node){this.beforeNode=node;},after(node){this.afterNode=node;},focus(){focused=this;},scrollIntoView(){scrolled=this;}});
+ const panels=[make(),make(),make()],grid=make(),bridge=make(),footnote=make(),choice=make();
+ const back=make(),next=make(),count=make(),buttons=[0,1,2].map(i=>({...make(),dataset:{concept:String(i)}}));
+ const prediction={...make(),querySelector:()=>choice};
+ const root={classList:{add(){}},querySelectorAll:()=>panels,querySelector:s=>({'.foundation-grid':grid,'.atomic-mole-bridge':bridge,'.foundation-footnote':footnote}[s]),closest:()=>({querySelector:()=>prediction})};
+ globalThis.document={createElement:name=>({...make(),querySelectorAll:()=>buttons,querySelector:s=>({'.concept-back':back,'.concept-next':next,'.concept-count':count}[s])})};
+ try{
+  const flow=mountFoundationSteps(root);assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);assert.ok(panels[2].children.includes(bridge));
+  next.onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);assert.equal(focused,panels[1]);
+  buttons[2].onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,true,false]);assert.equal(count.textContent,'觀念 3 / 3');
+  next.onclick();assert.equal(scrolled,prediction);assert.equal(focused,choice);
+  back.onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);
+  flow.reset();assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);
+ }finally{globalThis.document=previous;}
+});
