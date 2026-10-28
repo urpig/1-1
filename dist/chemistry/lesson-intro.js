@@ -30,3 +30,33 @@ export function mountFoundationCheck(root){
  }));
  return {reset(){buttons.forEach(button=>button.setAttribute('aria-pressed','false'));delete feedback.dataset.correct;feedback.textContent='跟著碳、氫的例子，找出原子量與一莫耳質量的關係。';}};
 }
+
+export function mountFoundationSteps(root){
+ const panels=[...root.querySelectorAll('.foundation-grid>article')],grid=root.querySelector('.foundation-grid');
+ const bridge=root.querySelector('.atomic-mole-bridge'),footnote=root.querySelector('.foundation-footnote');
+ const nav=document.createElement('nav'),controls=document.createElement('div');
+ nav.className='foundation-steps';nav.setAttribute('aria-label','一次認識一個基礎觀念');
+ const labels=['原子量：比較一顆','分子量：把原子加起來','莫耳：數一大群'];
+ nav.innerHTML=labels.map((label,i)=>'<button type="button" data-concept="'+i+'" aria-controls="foundation-panel-'+i+'"><span>'+(i+1)+'</span>'+label+'</button>').join('');
+ panels.forEach((panel,i)=>{panel.id='foundation-panel-'+i;panel.setAttribute('tabindex','-1');});
+ panels[2].append(bridge);
+ const notes=document.createElement('details');notes.className='foundation-source';notes.innerHTML='<summary>深入了解：精確定義與資料來源</summary>';footnote.before(notes);notes.append(footnote);
+ controls.className='foundation-controls';controls.innerHTML='<button type="button" class="secondary concept-back">← 上一個觀念</button><span class="concept-count" role="status"></span><button type="button" class="primary concept-next"></button>';
+ grid.before(nav);grid.after(controls);root.classList.add('is-guided');
+ let step=0;
+ function draw(focus=false){
+  panels.forEach((panel,i)=>panel.hidden=i!==step);
+  nav.querySelectorAll('button').forEach((button,i)=>button.setAttribute('aria-pressed',String(i===step)));
+  controls.querySelector('.concept-back').disabled=step===0;
+  controls.querySelector('.concept-count').textContent='觀念 '+(step+1)+' / 3';
+  controls.querySelector('.concept-next').textContent=step===2?'接著親手組裝 →':'下一個：'+labels[step+1].split('：')[0]+' →';
+  if(focus){nav.scrollIntoView({behavior:'auto',block:'start'});panels[step].focus({preventScroll:true});}
+ }
+ nav.querySelectorAll('button').forEach(button=>button.onclick=()=>{step=Number(button.dataset.concept);draw(true);});
+ controls.querySelector('.concept-back').onclick=()=>{step=Math.max(0,step-1);draw(true);};
+ controls.querySelector('.concept-next').onclick=()=>{
+  if(step<2){step++;draw(true);return;}
+  const prediction=root.closest('.learning-card').querySelector('.prediction');prediction.scrollIntoView({behavior:'auto',block:'start'});prediction.querySelector('button').focus({preventScroll:true});
+ };
+ draw();return {reset(){step=0;draw();}};
+}

@@ -175,7 +175,7 @@ export function mountMass(root,ctx){
  function finish(){
   const r=state();if(r.extent<=0)return;const same=records.some(x=>x.closed===closed&&Math.abs(x.soda-soda)<1e-8&&Math.abs(x.acid-acid)<1e-8);
   if(!same){records.push({soda,acid,closed,initial:r.initial,reading:r.reading,escaped:r.escaped});records=records.slice(-10);ctx.data.massRecords=records;ctx.save();}record();
-  notice(root,(closed?'氣體留在裝置內，反應前後讀數相同。':'天平減少的質量等於離開的 CO₂ 質量。')+(same?'相同結果已記錄，不重複新增。':'本輪已加入實驗紀錄。'));if(matchedMassPair(records))ctx.mark();
+  notice(root,(closed?'氣體留在裝置內，反應前後讀數相同。':'天平減少的質量等於離開的 CO₂ 質量。')+(same?'相同結果已記錄，不重複新增。':'本輪已加入實驗紀錄。'));ctx.mark();
  }
  const clock=reactionClock((value,run)=>{p=value;running=run;draw();},finish);
  const changeDose=()=>{added=false;baseline=false;clock.reset();notice(root,'用量已改變，請重新放入小杯並記錄反應前質量。');};
