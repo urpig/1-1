@@ -150,3 +150,177 @@
 .practice-controls button:disabled{opacity:.55;cursor:default}.dropper-actions{display:grid;gap:9px}.drop-count{margin:0 0 4px;color:#55734d;font-size:13px;font-weight:600}.dropper-actions .primary{min-height:46px;font-size:13px}.position-dropper{text-align:center}
 @media(max-width:1050px){.reaction-notes>.practice-controls{grid-column:1;grid-row:4}.reaction-notes:has(.practice-controls:not([hidden])) .demonstrate{grid-row:5}.reaction-notes:has(.practice-controls:not([hidden])) .reaction-rewind{grid-row:6}}
 @media(max-width:600px){.reagent-grab>span{font-size:10px;padding:3px;top:-20px}.reagent-grab>small{font-size:8px;bottom:-14px}.dropper-grab>span{font-size:9px;padding:4px}.hands-on-hint{font-size:10px;padding:10px}.reaction-drop-target{font-size:10px}}
+/* Local refinement · a consistent instrument desk, controls and feedback. */
+.interactive-studio {
+ --desk-accent:#275b4c; --desk-soft:#edf5ee; --desk-line:#d4ded5;
+ --desk-muted:#61756b; --desk-amber:#946622;
+ color:#243f35; isolation:isolate;
+}
+.interactive-studio :is(button,input,select,textarea,summary){font-family:inherit}
+.interactive-studio :is(button,summary){cursor:pointer;-webkit-tap-highlight-color:transparent}
+.interactive-studio button:not(:disabled){transition:background-color .16s,border-color .16s,box-shadow .16s,transform .16s}
+.interactive-studio button:active:not(:disabled){transform:translateY(1px)}
+.interactive-studio :is(button,input,select,textarea,summary):focus-visible,
+.supporting-activity :is(button,input,summary):focus-visible{outline:3px solid #b58d45;outline-offset:4px;scroll-margin:100px}
+.interactive-studio button:disabled{cursor:default;opacity:.5;box-shadow:none;transform:none}
+.interactive-studio :is(input,textarea)[aria-invalid="true"]{border-color:#b45e47!important;box-shadow:0 0 0 3px #b45e4715}
+.interactive-studio :is(input[type="number"],select){min-height:46px;border-radius:10px;border-color:#bccdc1;background-color:#fffefa;color:#294d3f}
+.interactive-studio input[type="range"]{min-height:30px;accent-color:var(--desk-accent);cursor:ew-resize}
+.interactive-studio :is(.primary,.secondary){min-height:44px;font-size:13px;border-radius:9px;line-height:1.6}
+.interactive-studio .primary{background:#285747;color:#fffdf3;border:1px solid #285747;box-shadow:0 3px 0 #163d2f17}
+.interactive-studio .primary:hover:not(:disabled){background:#1e4739;box-shadow:0 5px 14px #214f3924}
+.interactive-studio .secondary{background:#fffefa;border:1px solid #c5d3c8;color:#355b48}
+.interactive-studio .secondary:hover:not(:disabled){background:#edf4e9;border-color:#8aa68f}
+.interactive-studio :is(.text-button,.small,.model-note){font-size:12px;line-height:1.8}
+.studio-heading{padding-bottom:22px;margin-bottom:22px;gap:24px}
+.studio-heading h3{letter-spacing:.015em;font-size:27px}
+.studio-heading p{font-size:14px;color:#65786b;max-width:560px}
+.studio-expand{background:#f6f8f1;border:1px solid #c2d1c5;min-height:44px;font-size:13px}
+.interactive-studio .interaction-guide{border:1px solid #ccdccd;border-left:3px solid #668a67;border-radius:10px;background:#f1f6ed;padding:15px 18px;display:flex;align-items:center}
+.interaction-guide .guide-icon{background:#e0ebdc;color:#386444;border-radius:50%;width:33px;height:33px;display:grid;place-items:center;flex:none}
+.interactive-studio .guide-title{font-size:15px;font-weight:600}
+.interactive-studio .guide-detail{font-size:13px;line-height:1.75;margin:3px 0 0}
+.interactive-studio .next-action:not(:disabled){outline:2px solid #b69a56!important;outline-offset:3px;box-shadow:0 0 0 6px #d8c99b1f}
+.interactive-studio .workbench{padding:14px;border-radius:16px;border:1px solid var(--desk-line);background:#eaf0e9;box-shadow:inset 0 1px 0 #fff,0 8px 24px #173c2707;gap:16px}
+.interactive-studio .scene{border-radius:11px;background:#fafbf5;border:1px solid #d2ddd0}
+.interactive-studio .experiment-controls{background:#fffef9;border:1px solid #d5dfd1;border-radius:11px;padding:22px!important}
+.interactive-studio .select-label{font-size:13px;line-height:1.7;color:#536c5c;gap:7px}
+.interactive-studio .activity-status:not(:empty){font-size:13px;line-height:1.8;padding:12px 14px;border-radius:8px;border:1px solid #dce5d5;background:#f1f6eb;color:#42603c;margin-top:14px}
+.interactive-studio .metric strong{font-variant-numeric:tabular-nums}
+.interactive-studio .observation-panel{background:#fafbf4;border:1px solid #d6e0d1;border-radius:13px;padding:25px;margin-top:24px}
+.interactive-studio .observation-panel>h3{margin-top:0;font-size:20px}
+/* Atom tray and the result use the same calm hierarchy. */
+.molecule-studio .molecule-art{position:relative;min-height:240px;background:radial-gradient(ellipse at 50% 45%,#fffef7 0,#f4f7ef 65%,#e9f0e6 100%);cursor:grab;border-bottom:1px solid #e0e7db}
+.molecule-studio .molecule-art.is-rotating{cursor:grabbing}
+.molecule-studio .molecule-art svg{max-height:350px;width:100%}
+.molecule-studio .rack-heading{padding:20px 18px 12px;gap:8px;align-items:baseline}
+.molecule-studio .rack-heading b{font-size:14px}
+.molecule-studio .rack-heading>span{font-size:12px}
+.molecule-studio .element-rack{padding:0 18px 20px;gap:14px;display:flex;justify-content:center;flex-wrap:wrap}
+.molecule-studio .atom-supply{padding:12px 18px;background:#fffef8;border:1px solid #d6dfd0;border-radius:12px;display:grid;justify-items:center;gap:6px;min-width:115px}
+.molecule-studio .element-rack .element-token{position:relative;min-width:60px!important;width:60px;height:60px;min-height:60px!important;border-radius:50%;padding:0;display:grid;place-items:center;box-shadow:inset -5px -6px 12px #243d3020,0 4px 8px #294e3212}
+.molecule-studio .element-token::before{content:'＋';position:absolute;right:-6px;bottom:-3px;display:grid;place-items:center;background:#285747;color:#fff;width:23px;height:23px;border:2px solid #fffef8;border-radius:50%;font:16px/1 system-ui}
+.molecule-studio .element-token:disabled::before{content:'✓';background:#7b8f74}
+.molecule-studio .element-token>b{font-size:25px;width:auto;height:auto;background:none;box-shadow:none}
+.molecule-studio .token-name{font-size:13px;text-align:center}.molecule-studio .token-stock{font-size:12px}
+.molecule-studio .molecule-recipe{background:#f0f5e9;border:1px solid #d6e2c8;border-radius:10px;padding:15px}
+.molecule-studio .atom-line{padding:11px 0}.molecule-studio .atom-line.is-filled{background:#f3f7ee}
+.molecule-studio .remove-atom{width:32px;height:32px;border-radius:7px;border:1px solid #d5dfce;background:#fffdf5}
+.molecule-studio .molecule-readout{border-top:1px solid #dbe5d4;padding-top:18px;margin-top:16px}
+.molecule-studio .molar-handoff{border-left:3px solid #749367;background:#f0f5e9;border-radius:0 8px 8px 0;padding:13px 15px}
+/* A compact experiment chooser keeps the actual apparatus in view. */
+.phenomena-studio .phenomena-tabs{gap:9px;margin-bottom:17px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.phenomena-studio .phenomena-tabs button{position:relative;padding:14px 16px;min-height:92px;border-radius:10px;background:#f7f9f2;border:1px solid #d5dfd0;text-align:left}
+.phenomena-studio .phenomena-tabs button>span{font:13px Georgia;color:#a08751;display:block;margin-bottom:6px}
+.phenomena-studio .phenomena-tabs button>b{font-size:15px;display:block}
+.phenomena-studio .phenomena-tabs button>small{font-size:11px;line-height:1.6;display:block;margin-top:5px}
+.phenomena-studio .phenomena-tabs button[aria-pressed="true"]{background:#285747;color:#fffef4;border-color:#285747;box-shadow:0 4px 12px #214b2f18}
+.phenomena-studio .phenomena-tabs button[aria-pressed="true"]>small{color:#d6e4d3}
+.phenomena-studio .phenomena-tabs button.has-observed::after{content:'✓ 已觀察';position:absolute;right:10px;top:12px;font-size:10px;color:#789067}
+.phenomena-studio .phenomena-tabs button.has-observed[aria-pressed="true"]::after{color:#d3dfbd}
+.phenomena-studio .reaction-theater{border-radius:14px;border:1px solid #d0ddce;overflow:hidden;background:#f0f5ec}
+.phenomena-studio .reaction-stage-head{padding:14px 18px;min-height:46px;font-size:12px;border-bottom:1px solid #dae5d5}
+.phenomena-studio .reaction-phase{font-size:12px;font-weight:600;color:#426b47}
+.phenomena-studio .reaction-notes{padding:22px;background:#fffef8}
+.phenomena-studio .reaction-name{font-size:23px;line-height:1.55;margin:10px 0 17px}
+.phenomena-studio .reaction-observation{padding:16px;border:1px solid #dde5d4;border-radius:10px;background:#f5f8ee;font-size:14px;line-height:1.85}
+.phenomena-studio .reaction-observation>span{font-size:11px;letter-spacing:.08em;color:#81906d}
+.phenomena-studio .reaction-observation>p{font-size:14px;line-height:1.85;margin:7px 0 0;color:#4b6550}
+.phenomena-studio .reaction-equation{font-size:15px;padding:15px 0;overflow-wrap:anywhere}
+.phenomena-studio .reaction-stage>progress{display:block;width:100%;height:5px;border:0;border-radius:0;margin:0;accent-color:#63844e}
+.reaction-material-key{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;background:#f9fbf3;border-bottom:1px solid #dbe4d2;font-size:12px;color:#526d53;flex-wrap:wrap}
+.reaction-material-key>span{display:flex;align-items:center;gap:7px}.reaction-material-key i{width:7px;height:7px;border-radius:50%;background:#a6b7a0;box-shadow:0 0 0 3px #e9f0e1}
+.reaction-material-key>span:last-child i{background:#68865a}.reaction-material-key>b{font-weight:400;color:#a4ae95}
+.reaction-transport{display:flex;flex-wrap:wrap;gap:10px;padding:15px 18px;background:#f6f9ef;border-top:1px solid #dbe4d2;align-items:center}
+.reaction-transport .demonstrate{flex:1;min-width:190px}.reaction-transport .reaction-rewind{margin-left:auto;font-size:12px}
+.reaction-transport .view-comparison{flex:1}
+.phenomena-studio .hands-on-hint{font-size:12px;line-height:1.8;margin:0;padding:13px 18px;background:#f8faf2;color:#587052}
+.phenomena-studio .practice-controls{margin-top:16px}.phenomena-studio .drop-count{font-size:14px;font-variant-numeric:tabular-nums}
+.phenomena-studio .squeeze-dropper{width:100%;touch-action:none;user-select:none}
+.phenomena-studio :is(.squeeze-dropper,.dropper-grab)[aria-pressed="true"]{background:#94713c;color:#fffdf0;box-shadow:inset 0 3px 8px #4d371f30;transform:translateY(2px)}
+.phenomena-studio :is(.reagent-grab,.dropper-grab){border-radius:8px;box-shadow:0 3px 0 #203b2612;border:1px solid #8fa987;background:#fffff2;min-height:36px;font-size:12px}
+.phenomena-studio .reaction-comparison{scroll-margin-top:95px;border:1px solid #d4dfc9;border-radius:14px;padding:24px;background:#f7faf0;margin-top:25px}
+.phenomena-studio .reaction-comparison-label{font-size:13px;padding:13px 16px}
+/* Large, predictable coefficient controls; colour always has a text verdict. */
+.balance-studio .equation-workbench{border:1px solid #d3dfcc;border-radius:13px;background:#fbfcf5;padding:24px}
+.balance-studio .coefficient{background:#fffef9;border:1px solid #d1ddca;border-radius:12px;box-shadow:0 4px 0 #e5ecdf;padding:19px 13px}
+.balance-studio .coefficient>b{font-size:31px}.balance-studio .coefficient .species-side{font-size:11px}
+.balance-studio .coefficient button{width:40px;height:42px;font-size:22px;border:1px solid #bdcfb8;border-radius:8px;background:#f0f5e9;color:#355839}
+.balance-studio .coefficient button:hover:not(:disabled){background:#dfead4;border-color:#7e9b6b}
+.balance-studio .coefficient output{font-size:29px;font-variant-numeric:tabular-nums}
+.balance-studio .ledger-row{padding:14px 0}.balance-studio .ledger-verdict{font-size:13px}
+.balance-studio .equation-workbench.balanced{border-color:#88a971;box-shadow:inset 0 0 0 1px #88a971}
+.interactive-studio :is(.example-tabs,.level-tabs){gap:8px}
+.interactive-studio :is(.example-tabs,.level-tabs) button{min-height:43px;border-radius:8px;font-size:13px;border:1px solid #d0ddc6;background:#fafbf3;padding:10px 15px}
+.interactive-studio :is(.example-tabs,.level-tabs) button[aria-pressed="true"]{background:#e4edda;color:#335834;border-color:#8ca87b;box-shadow:inset 0 -2px #78935c}
+.interactive-studio .worked-example{border:1px solid #d6dfcc;border-radius:14px;background:#fcfdf6;padding:25px}
+.interactive-studio .example-heading h3{font-size:23px;line-height:1.6;margin-top:6px}
+.interactive-studio :is(.example-board,.balance-demo-board){border-radius:10px;background:#f3f7eb;border:1px solid #dce5ce;padding:22px}
+.interactive-studio :is(.example-takeaway,.demo-explanation){font-size:14px;line-height:1.9}
+.stoich-studio .automatic-steps>li{border-radius:11px;padding:19px;box-shadow:none;background:#f8faf2}
+.stoich-studio .automatic-steps p{font-size:13px}.stoich-studio .automatic-formula{font-size:18px;line-height:1.9}
+.stoich-studio .dose-presets button[aria-pressed="true"]{background:#e3edda;border-color:#7d9b69;color:#315331;box-shadow:inset 0 -2px #819966}
+.stoich-studio .dose-scale button{min-height:40px;font-size:12px}
+.stoich-studio .level-next{margin-top:12px}.stoich-studio .level-question h3{font-size:21px}
+.interactive-studio :is(.correct,.incorrect):not(:empty){padding:13px 16px;border-radius:9px;line-height:1.85;font-size:14px}
+.interactive-studio .correct{color:#315e39;background:#edf5e6;border:1px solid #cbdcbd}
+.interactive-studio .incorrect{color:#875337;background:#fbf1e7;border:1px solid #e3ceaf}
+.mass-studio .lab-command{background:#fcfdf6;padding:25px 22px;gap:23px}
+.mass-studio .lab-command-copy>b{font-size:23px;color:#2d553c;line-height:1.6}
+.mass-studio .lab-command-copy>p{font-size:13px;line-height:1.9}
+.mass-studio .mass-readout{box-shadow:0 4px 18px #29482b09;border-color:#c2d4b9}
+.mass-studio .mass-reading-grid .metric strong{font:35px/1.5 Georgia;font-variant-numeric:tabular-nums}
+.mass-studio .workflow-steps li{font-size:12px}.mass-studio .workflow-steps li.current>span{box-shadow:0 0 0 4px #b7cda728}
+.mass-studio .pair-card{border-radius:12px;padding:23px}.mass-studio .pair-card p{font-size:13px}
+/* The same readable language applies to the extension cards and written practice. */
+.supporting-detail{border-radius:13px;overflow:hidden}.supporting-detail>summary{min-height:62px;align-items:center;font-size:15px}
+.supporting-detail>summary small{border-radius:20px;padding:5px 10px;font-size:11px}
+.supporting-activity .guided-observation{border:1px solid #d5dfd0;border-radius:13px;background:#f9fbf3;padding:22px}
+.supporting-activity .guided-observation>.button-row{padding-top:18px;border-top:1px solid #dce5d4;align-items:center;gap:10px}
+.supporting-activity .guided-observation .step-count{font-size:12px;color:#6c8160;font-variant-numeric:tabular-nums;margin-left:auto}
+.supporting-activity .guided-observation[data-complete="true"] .step-count{color:#35643c;background:#e8f1df;border-radius:20px;padding:7px 11px}
+.supporting-activity :is(.step-next,.step-back,.step-play){min-height:43px;font-size:13px;border-radius:8px}
+.guided-practice{border:1px solid #d1ddc8;border-radius:14px;background:#fcfdf7;padding:25px}
+.practice-completion{min-width:145px;display:grid;gap:7px}.practice-completion .practice-progress{font-size:12px;white-space:nowrap}
+.practice-meter{width:100%;height:5px;accent-color:#6c8b57}
+.guided-practice .practice-picker{padding:17px;background:#f0f5e9;border:1px solid #dbe4cf;border-radius:10px;margin:20px 0}
+.guided-practice .practice-picker select{min-height:43px;font-size:13px;background:#fffef8}
+.guided-practice .practice-problem>h3{font-size:20px;line-height:1.9}
+.guided-practice :is(.practice-choices label,.practice-numeric){border:1px solid #d4dfc9;border-radius:9px;background:#fffef8;padding:13px}
+.guided-practice .practice-choices label:has(input:checked){border-color:#7f9d6f;background:#edf4e4;box-shadow:inset 3px 0 #7f9d6f}
+.guided-practice input:focus-visible{outline:3px solid #b58d45;outline-offset:3px}
+.guided-practice .practice-paging{border-top:1px solid #dce5d3;padding-top:19px;margin-top:23px}
+.learning-card .quiz-option{border-radius:10px;transition:background .15s,border-color .15s}
+.learning-card .quiz-option:has(input:checked){background:#edf4e6;border-color:#87a170;box-shadow:inset 3px 0 #7c9763}
+.learning-card .prediction-option[aria-pressed="true"]{box-shadow:inset 0 -3px #8c9e65}
+/* Focus mode gives the model and its primary action one laptop-height workspace. */
+.studio-dialog{width:min(1320px,calc(100vw - 32px));max-height:calc(100dvh - 28px);border-radius:16px;background:#f8faf2}
+.studio-dialog-bar{padding:11px 22px;min-height:64px}.studio-dialog-bar b{font-size:17px}.studio-dialog-bar .studio-eyebrow{font-size:9px}
+.studio-dialog-body{padding:20px}.studio-dialog-body .reaction-theater{grid-template-columns:minmax(0,1fr) 290px}
+.studio-dialog-body .phenomena-tabs{margin-bottom:14px}.studio-dialog-body .phenomena-tabs button{min-height:78px;padding:10px 14px}
+.studio-dialog-body .phenomena-tabs button>span{display:inline;margin-right:7px}.studio-dialog-body .phenomena-tabs button>b{display:inline;font-size:14px}
+.studio-dialog-body .phenomena-tabs button>small{font-size:11px;margin-top:4px}
+.studio-dialog-body .reaction-interactive-scene{max-width:min(100%,calc((100dvh - 355px)*1.7273));margin:0 auto}
+.studio-dialog-body .reaction-art .realistic-lab-scene{width:100%;display:block}
+.studio-dialog-body .reaction-stage{background:#e6eee4}
+.studio-dialog-body .reaction-material-key{font-size:11px;padding:9px 12px}
+.studio-dialog-body .reaction-transport{padding:11px 14px}
+.studio-dialog-body .hands-on-hint{padding:9px 14px;font-size:11px}
+.studio-dialog-body .reaction-notes{padding:19px}.studio-dialog-body .reaction-name{font-size:21px}
+.studio-dialog-body .reaction-observation{font-size:13px;padding:13px}.studio-dialog-body .reaction-observation>p{font-size:13px}
+.studio-dialog-body .molecule-art{min-height:160px}.studio-dialog-body .molecule-art svg{height:clamp(170px,calc(100dvh - 440px),350px)}
+.studio-dialog-body .element-rack{padding-bottom:14px}.studio-dialog-body .rack-heading{padding-top:13px}
+@media(min-width:1000px){.interactive-studio .workbench{grid-template-columns:minmax(0,1fr) 300px}.mass-studio .mass-workbench{display:block}.mass-studio .mass-workbench .scene{grid-template-columns:minmax(0,1fr) 245px}}
+@media(max-width:950px){.studio-dialog-body .reaction-theater{grid-template-columns:1fr}.studio-dialog-body .reaction-interactive-scene{max-width:100%}.interactive-studio .workbench{grid-template-columns:1fr}.mass-studio .mass-workbench .scene{grid-template-columns:1fr}.phenomena-studio .reaction-theater{grid-template-columns:1fr}.studio-heading{align-items:flex-start}}
+@media(max-width:600px){.studio-heading h3{font-size:23px}.studio-heading p{font-size:13px}.interactive-studio .experiment-controls{padding:18px!important}.phenomena-studio .phenomena-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.phenomena-studio .phenomena-tabs button{min-height:85px;padding:12px}.phenomena-studio .reaction-notes{padding:18px}.reaction-transport .demonstrate{min-width:100%}.reaction-transport .reaction-rewind{margin-left:0}.reaction-material-key{font-size:11px;gap:8px}.studio-dialog{width:calc(100vw - 12px);max-height:calc(100dvh - 12px)}.studio-dialog-body{padding:12px}.studio-dialog-bar{padding:10px 13px}.studio-dialog-body .molecule-art svg{height:220px}.molecule-studio .atom-supply{min-width:100px;padding:11px}.interactive-studio .worked-example{padding:17px}.interactive-studio :is(.example-board,.balance-demo-board){padding:15px}.balance-studio .equation-workbench{padding:15px 9px}.balance-studio .coefficient{padding:13px 6px}.balance-studio .coefficient button{width:30px;height:38px}.balance-studio .coefficient>b{font-size:24px}.balance-studio .ledger-verdict{font-size:11px}.mass-studio .mass-reading-grid .metric strong{font-size:25px}.guided-practice{padding:17px}.practice-completion{min-width:100px}.supporting-activity .guided-observation{padding:15px}.supporting-activity .guided-observation>.button-row{gap:7px}.supporting-activity .guided-observation .step-count{flex-basis:100%;margin-left:0}.interactive-studio .example-heading h3{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.interactive-studio *, .supporting-activity *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+.reduce-motion .interactive-studio *{transition:none!important;animation:none!important}
+/* Extension diagrams expose their position and allow returning to any step. */
+.observation-progress{display:flex;gap:10px;margin-bottom:21px;padding-bottom:18px;border-bottom:1px solid #dce5d4}
+.observation-progress button{flex:1;min-width:0;display:flex;align-items:center;gap:9px;justify-content:center;border:1px solid #d3dfca;border-radius:9px;background:#f9fbf4;padding:10px 8px;min-height:44px;color:#6c8061}
+.observation-progress button>span{display:grid;place-items:center;width:24px;height:24px;flex:none;border-radius:50%;background:#e9efdf;font:13px Georgia}
+.observation-progress button>small{font-size:12px;line-height:1.6}
+.observation-progress button[aria-pressed="true"]{border-color:#86a071;background:#eaf2e0;color:#335c38;box-shadow:inset 0 -2px #80995d}
+.observation-progress button[aria-pressed="true"]>span{background:#547747;color:#fffdf1}
+.observation-progress button:hover{border-color:#8fa87c;background:#eff5e7}
+@media(max-width:600px){.observation-progress{gap:5px}.observation-progress button{flex-direction:column;gap:5px;padding:8px 4px}.observation-progress button>small{font-size:10px}}
