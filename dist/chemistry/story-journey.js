@@ -197,11 +197,6 @@ export const returnJourney={
       "阿公，目的地一直在跳！"
     ],
     [
-      "leon",
-      "surprised",
-      "是我收藏袋裡的那顆礦石？"
-    ],
-    [
       "grandpa",
       "determined",
       "裝置失控了！抓緊，別放手！"

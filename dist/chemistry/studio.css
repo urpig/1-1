@@ -375,3 +375,8 @@ details.comparison-definition{font-size:13px;line-height:1.85}
 #story-ending{width:calc(100% - 40px);max-width:1330px;margin:36px auto 48px;box-sizing:border-box;scroll-margin-top:100px}
 .ending-shortcut{display:block;margin-bottom:16px;color:#e6ebda;font-size:14px;text-decoration:none}
 .ending-shortcut:hover,.ending-shortcut:focus-visible{text-decoration:underline}
+
+.ending-art{margin:24px 0;overflow:hidden;border-radius:12px;background:#173d3d}
+.ending-art img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain}
+#story-ending .story-dialogue{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:600px){#story-ending .story-dialogue{grid-template-columns:1fr}.ending-art{margin:18px 0}}
