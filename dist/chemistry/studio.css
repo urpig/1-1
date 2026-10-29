@@ -340,3 +340,17 @@
 .learning-card :is(.student-contract,.quiz,.prediction,.activity,.lesson-checkpoints){scroll-margin-top:100px}
 @media(max-width:1000px){.student-contract ol{grid-template-columns:1fr}.student-contract li>strong{margin-left:6px}.studio-outcome{display:block}.studio-outcome>.primary{margin-top:16px}}
 @media(max-width:600px){.student-contract{padding:17px;margin-bottom:20px}.student-contract>div>b{font-size:16px}.student-contract ol{gap:11px}.student-contract li{font-size:13px}.learning-card .lesson-checkpoints{display:block;padding:18px}.lesson-checkpoints>.primary{width:100%;margin-top:16px}.foundation-steps{gap:6px}.foundation-steps button{flex-direction:column;font-size:12px;gap:6px;padding:9px 5px}.foundation-lesson.is-guided .foundation-grid>article{padding:20px 17px}.foundation-lesson.is-guided .foundation-grid>article>p{font-size:15px}.foundation-controls{gap:8px;flex-wrap:wrap}.foundation-controls .primary,.foundation-controls .secondary{font-size:12px;padding:11px}.concept-count{order:-1;width:100%;text-align:center}.studio-dialog-body>.prediction{padding:16px}.studio-outcome{padding:18px}.supporting-detail>summary{flex-wrap:wrap}.studio-outcome>.primary{width:100%}}
+
+/* Keep essential explanations visible; let students open supporting detail. */
+.lesson-key-points{margin:12px 0 0;padding-left:21px;line-height:1.85;font-size:15px}
+.lesson-key-points li{padding:4px 0}
+.explanation-depth{margin-top:16px;padding-top:12px;border-top:1px solid #d6e0cc;font-size:13px;color:#64765c}
+.explanation-depth>summary,details.term-primer>summary,details.comparison-definition>summary{cursor:pointer;min-height:32px;color:#5b7050}
+.explanation-depth p{font-size:13px;line-height:1.9}
+details.term-primer{padding:16px 20px}
+details.term-primer>summary{font-size:15px;font-weight:600}
+details.term-primer>summary>span{font-size:12px;font-weight:400;color:#839078;margin-left:12px}
+details.term-primer[open] .term-primer-grid{margin-top:18px}
+details.term-primer>.secondary{width:auto;margin-top:12px}
+details.comparison-definition{font-size:13px;line-height:1.85}
+@media(max-width:600px){.lesson-key-points{font-size:14px}details.term-primer{padding:14px 16px}}
