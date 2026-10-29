@@ -597,7 +597,7 @@ export const lessons=[
     "act": "終章 · 真正的煉金之道",
     "type": "final",
     "question": "賢者之石真的能把其他元素變成金嗎？",
-    "story": "石頭與晶石都不含金。加熱後雖然發光、變色，真的能生成黃金嗎？",
+    "story": "離開工坊前，三人翻回點金那一頁：石頭與晶石都不含金，普通化學反應能變出黃金嗎？",
     "dialogue": [
       [
         "kui",
@@ -737,11 +737,11 @@ export const practiceProblems=[
 const take=id=>lessons.find(c=>c.id===id);
 // Stable IDs preserve saved answers; order is independent of those IDs.
 export const cards=[
- {...take(5),...journey[3],id:3,title:'原子量、分子量與莫耳',act:'第一站 · 先建立微粒與質量的觀念',story:'小葵與阿公遇見煉金術士里昂。研究配方前，先認識原子量、分子量與莫耳。',dialogue:[['leon','curious','原子小得看不見，怎麼知道它多重、有多少？'],['kui','thinking','把分子裡的原子量加起來！'],['grandpa','gentle','再用莫耳，把粒子數和克數連起來。']],question:'原子量、分子量與莫耳，分別在回答什麼問題？',task:'看懂觀念 → 組好一種物質 → 回答一題。',extras:[4,6,7],bridge:'知道物質由哪些微粒組成，接著來辨認化學反應留下的現象。'},
- {...take(2),...journey[1],id:1,type:'phenomena',title:'化學反應的常見現象',act:'第二站 · 用新物質判斷化學變化',prediction:take(1).prediction,choices:take(1).choices,story:'里昂認為發光的晶石能點金。先做四個實驗，找出新物質的證據。',task:'完成四種反應觀察，再回答一題。',extras:[],bridge:'有了反應物與生成物的證據，下一站學會用化學式把反應寫下來。'},
- {...take(9),...journey[4],id:4,title:'化學反應式怎麼寫？',act:'第三站 · 從文字到配平的反應式',extras:[8,10],bridge:'反應式的係數告訴我們莫耳數的比例。接著用這個比例算出產物有幾克。'},
- {...take(11),...journey[5],id:5,title:'用反應式預測產量',act:'第四站 · 看懂示範，再自己計算',question:'已知投入多少克，如何算出能生成多少克產物？',task:'看例題 → 完成三個小關卡 → 回答一題。',extras:[],bridge:'算出產物之後，最後到天平前驗證：反應前後的總質量是否相同？'},
- {...take(3),...journey[2],id:2,title:'質量守恆：追蹤每一克',act:'第五站 · 在實驗室驗證質量守恆',task:'準備 → 秤量 → 混合。用相同用量比較開放、密閉結果。',extras:[12],bridge:'把氣體也算進去，物質沒有憑空消失。最後整理原子的證據，替點石成金寫下有理由的答案。'}
+ {...take(5),...journey[3],id:3,title:'原子量、分子量與莫耳',question:'原子量、分子量與莫耳，分別在回答什麼問題？',task:'看懂觀念 → 組好一種物質 → 回答一題。',extras:[4,6,7]},
+ {...take(2),...journey[1],id:1,type:'phenomena',title:'化學反應的常見現象',prediction:take(1).prediction,choices:take(1).choices,task:'完成四種反應觀察，再回答一題。',extras:[]},
+ {...take(9),...journey[4],id:4,title:'化學反應式怎麼寫？',extras:[8,10]},
+ {...take(11),...journey[5],id:5,title:'用反應式預測產量',question:'已知投入多少克，如何算出能生成多少克產物？',task:'看例題 → 完成三個小關卡 → 回答一題。',extras:[]},
+ {...take(3),...journey[2],id:2,title:'質量守恆：追蹤每一克',task:'準備 → 秤量 → 混合。用相同用量比較開放、密閉結果。',extras:[12]}
 ];
 lessons[0].story='里昂認為賢者之石的光芒就是證據。小葵把三種變化並排，請他先比較：前後的微粒有沒有改變？';
 export const supplementCards=[4,6,7,8,10,12].map(sourceId=>({...take(sourceId),id:'extra-'+sourceId,sourceId}));
