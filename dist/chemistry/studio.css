@@ -363,3 +363,11 @@ details.comparison-definition{font-size:13px;line-height:1.85}
 .phenomena-studio .reaction-stage-head b{font-size:13px}
 .sidebar-volume>b{margin-top:0}
 .studio-heading h3{margin-top:0}
+
+/* Story coda: an optional cliffhanger after the scientific conclusion. */
+.story-epilogue{margin-top:28px;padding:20px 24px;border:1px solid #c8d7cf;border-left:3px solid #718b83;border-radius:12px;background:#eef3ef}
+.story-epilogue>summary{cursor:pointer;font-size:18px;font-weight:600;color:#284f42;line-height:1.7}
+.story-epilogue>p{font-size:15px;line-height:1.9}
+.story-epilogue .epilogue-question{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:0}
+.epilogue-question>span{font-size:14px;color:#607c70}
+@media(max-width:600px){.story-epilogue{padding:16px}.story-epilogue>summary{font-size:16px}}
