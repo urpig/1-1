@@ -51,7 +51,7 @@ test('offline package embeds its assets and preserves the shared calculation cor
  const endingImage=html.match(/src="data:image\/svg\+xml;base64,([^"]+)"/);
  assert.ok(endingImage,'the ending illustration must be available offline');
  assert.equal(Buffer.from(endingImage[1],'base64').toString('utf8'),fs.readFileSync(new URL('../dist/chemistry/assets/time-vortex.svg',import.meta.url),'utf8'));
- assert.ok(!html.includes('src="./assets/time-vortex.svg"'));
+ assert.ok(!html.includes('src="./assets/time-vortex.svg'));
  const script=html.match(/<script>([\s\S]*)<\/script>/)[1];new vm.Script(script);
  const prefix=script.split('__modules["app.js"]')[0];
  const result=vm.runInNewContext(prefix+';__modules["core.js"].convert(36,"g","H2O");');
