@@ -354,3 +354,12 @@ details.term-primer[open] .term-primer-grid{margin-top:18px}
 details.term-primer>.secondary{width:auto;margin-top:12px}
 details.comparison-definition{font-size:13px;line-height:1.85}
 @media(max-width:600px){.lesson-key-points{font-size:14px}details.term-primer{padding:14px 16px}}
+
+/* Preserve readable labels after removing redundant captions. */
+.card-kicker>span:only-child{max-width:none;padding:0;border:0;background:none;border-radius:0;font-size:13px}
+.student-contract>div>b{font-size:15px}
+#storage-status:empty,.prediction-status:empty,.atomic-mole-feedback:empty,.mass-ledger-equation:empty,[data-extra-status]:empty,.lesson-checkpoints span:empty{display:none}
+.reaction-stage-head{justify-content:flex-end}
+.phenomena-studio .reaction-stage-head b{font-size:13px}
+.sidebar-volume>b{margin-top:0}
+.studio-heading h3{margin-top:0}

@@ -10,7 +10,7 @@ const stopInfo={3:['原子與莫耳','先理解質量與微粒的關係'],1:['�
 export function mountPolish(cards){
  const stops=cards.map(c=>stopInfo[c.id]);
  const route=document.querySelector('#chapter-route'), map=document.querySelector('.expedition-stations');
- map.innerHTML=stops.map((s,i)=>'<a class="expedition-stop" href="#chem-'+cards[i].id+'"><span class="stop-top"><svg class="stop-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[cards[i].id-1]+'</svg><span class="stop-number">0'+(i+1)+'</span></span><b>'+s[0]+'</b><small>'+s[1]+'</small><span class="stop-arrow" aria-hidden="true">↗</span></a>').join('');
+ map.innerHTML=stops.map((s,i)=>'<a class="expedition-stop" href="#chem-'+cards[i].id+'"><span class="stop-top"><svg class="stop-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[cards[i].id-1]+'</svg><span class="stop-number">0'+(i+1)+'</span></span><b>'+s[0]+'</b><span class="stop-arrow" aria-hidden="true">↗</span></a>').join('');
  const sheets=[...document.querySelectorAll('.learning-card')];
  sheets.forEach((sheet,index)=>{
   const header=sheet.querySelector('.card-header');header.dataset.chapterNumber=String(index+1).padStart(2,'0');

@@ -1,6 +1,6 @@
 export function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 export function metric(label,value,unit=''){return '<div class="metric"><span>'+label+'</span><strong>'+value+' <small>'+unit+'</small></strong></div>';}
-export function ExplorationWorkbench(scene,controls,note=''){return '<div class="workbench"><div class="model-column"><div class="scene">'+scene+'</div><p class="model-note">'+note+'</p></div><aside class="experiment-controls">'+controls+'</aside></div>';}
+export function ExplorationWorkbench(scene,controls,note=''){return '<div class="workbench"><div class="model-column"><div class="scene">'+scene+'</div>'+(note?'<p class="model-note">'+note+'</p>':'')+'</div><aside class="experiment-controls">'+controls+'</aside></div>';}
 export function numberField(id,label,value,min,max,step,unit){return '<div class="number-field"><label for="'+id+'">'+label+' <span>'+unit+'</span></label><div class="number-pair"><input id="'+id+'" type="number" min="'+min+'" max="'+max+'" step="any" value="'+value+'" inputmode="decimal" aria-describedby="'+id+'-error"><input aria-label="'+label+'滑桿" type="range" min="'+min+'" max="'+max+'" step="any" data-step="'+step+'" value="'+value+'" data-pair="'+id+'"></div><span class="field-error" id="'+id+'-error" role="status"></span></div>';}
 export function bindNumber(root,id,callback){
  const input=root.querySelector('#'+id),range=root.querySelector('[data-pair="'+id+'"]'),error=root.querySelector('#'+id+'-error');
@@ -41,7 +41,7 @@ export function massTrace(initial,reading,progress){
 // One short next action; repeated animation frames do not re-announce unchanged guidance.
 export function guideStep(root,title,detail,selector=''){
  let guide=root.querySelector('.interaction-guide');
- if(!guide){guide=document.createElement('div');guide.className='interaction-guide';guide.setAttribute('role','status');guide.setAttribute('aria-live','polite');guide.innerHTML='<span class="guide-icon" aria-hidden="true">↗</span><div><b class="guide-title"></b><p class="guide-detail"></p></div><span class="guide-label">操作小提示</span>';const heading=root.querySelector('.studio-heading');if(heading)heading.after(guide);else root.prepend(guide);}
+ if(!guide){guide=document.createElement('div');guide.className='interaction-guide';guide.setAttribute('role','status');guide.setAttribute('aria-live','polite');guide.innerHTML='<span class="guide-icon" aria-hidden="true">↗</span><div><b class="guide-title"></b><p class="guide-detail"></p></div>';const heading=root.querySelector('.studio-heading');if(heading)heading.after(guide);else root.prepend(guide);}
  if(guide.querySelector('.guide-title').textContent!==title)guide.querySelector('.guide-title').textContent=title;
  if(guide.querySelector('.guide-detail').textContent!==detail)guide.querySelector('.guide-detail').textContent=detail;
  root.querySelectorAll('.next-action').forEach(x=>x.classList.remove('next-action'));

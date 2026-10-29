@@ -6,10 +6,10 @@ export const balanceDemonstrationSteps=[
 ];
 export function mountBalanceDemonstration(root){
  const practice=root.querySelector('.equation-workbench'),drawer=document.createElement('details');drawer.className='balance-practice';
- drawer.innerHTML='<summary><b>換你操作：自己調整係數</b><span>四個反應，逐一核對原子數</span></summary>';
+ drawer.innerHTML='<summary><b>換你操作：自己調整係數</b></summary>';
  practice.before(drawer);drawer.append(practice);
  const demo=document.createElement('section');demo.className='worked-example balance-example';demo.setAttribute('aria-label','係數平衡的分步示範');
- demo.innerHTML='<div class="example-heading"><span class="studio-eyebrow">先看示範 / 氫氣與氧氣生成水</span><h3>只改前面的係數，讓原子數一樣多</h3><p>係數會乘上整個化學式。例如 2H₂O 是兩份水，不是把 H₂O 改成另一種物質。</p></div><div class="example-tabs" role="group" aria-label="係數平衡示範步驟">'+['1 數原子','2 先配氧','3 再配氫'].map((text,i)=>'<button type="button" data-balance-demo="'+i+'" aria-pressed="'+(i===0)+'">'+text+'</button>').join('')+'</div><div class="balance-demo-board" aria-live="polite"></div><div class="example-actions"><button type="button" class="primary balance-demo-next"></button><button type="button" class="text-button balance-demo-restart">從頭看示範</button></div>';
+ demo.innerHTML='<div class="example-heading"><h3>只改前面的係數，讓原子數一樣多</h3></div><div class="example-tabs" role="group" aria-label="係數平衡示範步驟">'+['1 數原子','2 先配氧','3 再配氫'].map((text,i)=>'<button type="button" data-balance-demo="'+i+'" aria-pressed="'+(i===0)+'">'+text+'</button>').join('')+'</div><div class="balance-demo-board" aria-live="polite"></div><div class="example-actions"><button type="button" class="primary balance-demo-next"></button><button type="button" class="text-button balance-demo-restart">從頭看示範</button></div>';
  drawer.before(demo);let step=0;
  function draw(){
   const current=balanceDemonstrationSteps[step],r=reactions.water,ledger=atomLedger(r,current.coeff),formulas=[...r.left,...r.right];
