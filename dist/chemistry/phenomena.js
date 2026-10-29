@@ -3,22 +3,22 @@ import { realisticReactionScene } from './reaction-scenes.js';
 import { reactionClock } from './components.js';
 import { prepareStudio } from './studio.js';
 export const demonstrations = [
- {id:'light',title:'發光與放熱',name:'鎂帶燃燒',before:'銀白色鎂帶放在燃燒匙內，準備在酒精燈上方加熱。',during:'燃燒匙內的鎂帶燃燒，發出白光，並放出熱量。',after:'燃燒匙內留下白色氧化鎂；這是與原來鎂帶不同的物質。',equation:'2Mg + O₂ → 2MgO',action:'點火，觀察鎂帶',product:'白色氧化鎂',note:'以柔和光暈代替實際強光；真實實驗勿直視燃燒的鎂。'},
- {id:'color',title:'顏色改變',name:'含水硫酸銅受熱',before:'蒸發皿內有藍色的含水硫酸銅晶體。',during:'持續加熱，晶體逐漸失去結晶水，藍色轉淡。',after:'留下白色的無水硫酸銅，水以水蒸氣離開。',equation:'CuSO₄·5H₂O → CuSO₄ + 5H₂O',action:'加熱，觀察顏色',product:'白色無水硫酸銅',note:'反應條件：加熱。以淡色軌跡標示水蒸氣去向；水蒸氣本身無色。'},
- {id:'solid',title:'生成沉澱',name:'碳酸鈉溶液＋氯化鈣溶液',before:'兩種溶液原本都透明，還沒有接觸。',during:'兩種溶液接觸後，混合處逐漸出現白色混濁。',after:'生成不溶於水的碳酸鈣，白色固體逐漸沉降。',equation:'Na₂CO₃ + CaCl₂ → CaCO₃↓ + 2NaCl',action:'混合，觀察沉澱',product:'白色碳酸鈣沉澱',note:'沉降過程經過加速。CaCO₃ 是固體，NaCl 仍溶在水中。'},
- {id:'gas',title:'產生氣體',name:'石灰石＋稀鹽酸',before:'燒杯內是石灰石與少量水；滴管內是稀鹽酸。',during:'酸滴到石灰石，固體表面出現持續上升的氣泡。',after:'生成的二氧化碳離開液面；石灰石逐漸減少。',equation:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑',action:'滴入，觀察氣泡',product:'二氧化碳氣體',note:'石灰石示意為過量，反應後仍有剩餘；氣體身分需另行檢驗。'}
+ {id:'light',title:'發光與放熱',name:'鎂帶燃燒',before:'銀白色鎂帶放在燃燒匙內，準備在酒精燈上方加熱。',during:'燃燒匙內的鎂帶燃燒，發出白光，並放出熱量。',after:'燃燒匙內留下白色氧化鎂；這是與原來鎂帶不同的物質。',equation:'2Mg + O₂ → 2MgO',action:'點火，觀察鎂帶',product:'白色氧化鎂',note:'實作時勿直視燃燒的鎂。'},
+ {id:'color',title:'顏色改變',name:'含水硫酸銅受熱',before:'蒸發皿內有藍色的含水硫酸銅晶體。',during:'持續加熱，晶體逐漸失去結晶水，藍色轉淡。',after:'留下白色的無水硫酸銅，水以水蒸氣離開。',equation:'CuSO₄·5H₂O → CuSO₄ + 5H₂O',action:'加熱，觀察顏色',product:'白色無水硫酸銅',note:'水蒸氣無色；淡色軌跡只表示去向。'},
+ {id:'solid',title:'生成沉澱',name:'碳酸鈉溶液＋氯化鈣溶液',before:'兩種溶液原本都透明，還沒有接觸。',during:'兩種溶液接觸後，混合處逐漸出現白色混濁。',after:'生成不溶於水的碳酸鈣，白色固體逐漸沉降。',equation:'Na₂CO₃ + CaCl₂ → CaCO₃↓ + 2NaCl',action:'混合，觀察沉澱',product:'白色碳酸鈣沉澱',note:'CaCO₃ 沉澱；NaCl 仍溶於水。'},
+ {id:'gas',title:'產生氣體',name:'石灰石＋稀鹽酸',before:'燒杯內是石灰石與少量水；滴管內是稀鹽酸。',during:'酸滴到石灰石，固體表面出現持續上升的氣泡。',after:'生成的二氧化碳離開液面；石灰石逐漸減少。',equation:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑',action:'滴入，觀察氣泡',product:'二氧化碳氣體',note:'石灰石過量；氣體身分需另行檢驗。'}
 ];
 export function phenomenonScene(id,p=0){return realisticReactionScene(id,p);}
 export function reactionComparison(d,progress=1){
- return '<div class="reaction-comparison-heading"><span class="studio-eyebrow">觀察完成 / 前後對照</span><h4>'+d.name+'：物質變成什麼了？</h4><p>看顏色、形態與新物質。</p></div><div class="reaction-comparison-pair">'+[0,progress].map((p,index)=>'<figure><div class="reaction-comparison-label"><span>0'+(index+1)+'</span><b>'+(p?(progress<1?'滴入鹽酸後 · 觀察中':'反應後'):'反應前')+'</b></div>'+realisticReactionScene(d.id,p,p?'comparison-after':'comparison-before')+'<figcaption><strong>'+(p?'生成新物質：'+d.product:'原來的材料')+'</strong><p>'+(p?d.after:d.before)+'</p></figcaption></figure>').join('')+'</div>';
+ return '<div class="reaction-comparison-heading"><h4>'+d.name+'：物質變成什麼了？</h4></div><div class="reaction-comparison-pair">'+[0,progress].map((p,index)=>'<figure><div class="reaction-comparison-label"><span>0'+(index+1)+'</span><b>'+(p?(progress<1?'滴入鹽酸後 · 觀察中':'反應後'):'反應前')+'</b></div>'+realisticReactionScene(d.id,p,p?'comparison-after':'comparison-before')+'<figcaption><strong>'+(p?'生成新物質：'+d.product:'原來的材料')+'</strong><p>'+(p?d.after:d.before)+'</p></figcaption></figure>').join('')+'</div>';
 }
 export function mountPhenomena(root,ctx){
  let selected=0,p=0,running=false,practice=createReactionPractice(),busy=false,frame=0,animationEpoch=0;
  let pour=null,drag=null,dropper={x:583,y:221},gasPulse=0,suppressClick=false,holding=false;
  const seen=new Set(ctx.data.phenomenaSeen||[]);
  root.classList.add('phenomena-studio');root.setAttribute('data-glossary-skip','');
- root.innerHTML='<div class="phenomena-tabs" role="group" aria-label="選擇反應示範">'+demonstrations.map((d,i)=>'<button data-demo="'+i+'" aria-pressed="'+(i===0)+'"><span>0'+(i+1)+'</span><b>'+d.title+'</b><small>'+d.name+'</small></button>').join('')+'</div><div class="reaction-theater"><div class="reaction-stage"><div class="reaction-stage-head"><span>親手操作 / 觀察物質變化</span><b class="reaction-phase"></b></div><div class="reaction-interactive-scene"><div class="reaction-art"></div><div class="reaction-instruments"><div class="reaction-drop-target" aria-hidden="true">移到燒杯這裡</div><button type="button" class="reagent-grab sodium-grab" data-practice-tool="sodium" aria-label="拿取碳酸鈉溶液，點選加入或拖到燒杯"><span>碳酸鈉</span><small>點選或拖曳加入</small></button><button type="button" class="reagent-grab calcium-grab" data-practice-tool="calcium" aria-label="拿取氯化鈣溶液，點選加入或拖到燒杯"><span>氯化鈣</span><small>點選或拖曳加入</small></button><button type="button" class="dropper-grab" data-practice-tool="dropper"><span>拖曳滴管</span></button></div></div><progress max="1" value="0" aria-label="反應示範進度"></progress><p class="hands-on-hint"></p></div><aside class="reaction-notes"><span class="studio-eyebrow">觀察一個真實反應的過程</span><h3 class="reaction-name"></h3><div class="reaction-observation" role="status" aria-live="polite"></div><div class="practice-controls"><div class="solution-actions"><button type="button" data-add-solution="sodium">加入碳酸鈉溶液</button><button type="button" data-add-solution="calcium">加入氯化鈣溶液</button></div><div class="dropper-actions"><p class="drop-count"></p><button type="button" class="position-dropper">將滴管移到燒杯上方</button><button type="button" class="primary squeeze-dropper">按住連續滴加</button></div></div><div class="reaction-equation"></div><button class="primary demonstrate"></button><button class="text-button reaction-rewind">重新實驗</button></aside></div><section class="reaction-comparison" aria-label="反應前後的物質變化對照" hidden></section><p class="reaction-note"></p><div class="evidence-caution"><b>看到變化，還要確認是否生成新物質。</b><p>水沸騰也會冒泡，卻仍是水。本頁為模擬；實作須由教師指導。</p></div>';
- prepareStudio(root,{number:'02',title:'化學反應觀察室',description:'加熱、加入溶液或擠壓滴管，親手觀察反應前後。'}, ctx);
+ root.innerHTML='<div class="phenomena-tabs" role="group" aria-label="選擇反應示範">'+demonstrations.map((d,i)=>'<button data-demo="'+i+'" aria-pressed="'+(i===0)+'"><span>0'+(i+1)+'</span><b>'+d.title+'</b><small>'+d.name+'</small></button>').join('')+'</div><div class="reaction-theater"><div class="reaction-stage"><div class="reaction-stage-head"><b class="reaction-phase"></b></div><div class="reaction-interactive-scene"><div class="reaction-art"></div><div class="reaction-instruments"><div class="reaction-drop-target" aria-hidden="true">移到燒杯這裡</div><button type="button" class="reagent-grab sodium-grab" data-practice-tool="sodium" aria-label="拿取碳酸鈉溶液，點選加入或拖到燒杯"><span>碳酸鈉</span></button><button type="button" class="reagent-grab calcium-grab" data-practice-tool="calcium" aria-label="拿取氯化鈣溶液，點選加入或拖到燒杯"><span>氯化鈣</span></button><button type="button" class="dropper-grab" data-practice-tool="dropper"><span>拖曳滴管</span></button></div></div><progress max="1" value="0" aria-label="反應示範進度"></progress><p class="hands-on-hint"></p></div><aside class="reaction-notes"><h3 class="reaction-name"></h3><div class="reaction-observation" role="status" aria-live="polite"></div><div class="practice-controls"><div class="solution-actions"><button type="button" data-add-solution="sodium">加入碳酸鈉溶液</button><button type="button" data-add-solution="calcium">加入氯化鈣溶液</button></div><div class="dropper-actions"><p class="drop-count"></p><button type="button" class="position-dropper">將滴管移到燒杯上方</button><button type="button" class="primary squeeze-dropper">按住連續滴加</button></div></div><div class="reaction-equation"></div><button class="primary demonstrate"></button><button class="text-button reaction-rewind">重新實驗</button></aside></div><section class="reaction-comparison" aria-label="反應前後的物質變化對照" hidden></section><p class="reaction-note"></p><div class="evidence-caution"><b>本頁為實驗模擬，實作須由教師指導。</b></div>';
+ prepareStudio(root,{number:'02',title:'化學反應觀察室'}, ctx);
  const q=s=>root.querySelector(s),qa=s=>root.querySelectorAll(s);
  const transport=document.createElement('div');transport.className='reaction-transport';
  transport.append(q('.demonstrate'),q('.reaction-rewind'));
@@ -46,10 +46,10 @@ export function mountPhenomena(root,ctx){
   let description=p===0?d.before:p===1?d.after:d.during;
   if(d.id==='solid'&&!running&&p===0)description=busy?'正在把溶液倒入燒杯。':practice.solutions.length===0?'依序加入兩種溶液，觀察是否出現沉澱。':'已加入'+(practice.solutions[0]==='sodium'?'碳酸鈉':'氯化鈣')+'溶液；仍是透明液體。再加入另一種，看看會發生什麼。';
   if(d.id==='gas'&&p<1)description=busy?'一滴鹽酸落到石灰石，觀察表面的氣泡。':practice.dropperReady?'按住滴加，放開停止。看到氣泡即可比較前後。':'拖曳滴管到燒杯上方，或按下方定位鍵。';
-  const observation='<span>'+phase+'</span><p>'+description+'</p>'+(p===1?'<b>新物質：'+d.product+'</b>':'');
+  const observation='<p>'+description+'</p>'+(p===1?'<b>新物質：'+d.product+'</b>':'');
   if(q('.reaction-observation').innerHTML!==observation)q('.reaction-observation').innerHTML=observation;
   q('.reaction-equation').textContent=d.equation;
-  q('.reaction-note').textContent=d.note+(d.id==='solid'?' 兩種溶液都是無色，以上方標示辨認。':d.id==='gas'?' 12 滴僅為滴管容量，不是反應所需滴數。':'');
+  q('.reaction-note').textContent=d.note+(d.id==='gas'?' 12 滴僅為滴管容量。':'');
   const play=q('.demonstrate');play.hidden=d.id==='gas'||(d.id==='solid'&&practice.solutions.length<2);play.disabled=busy;
   play.textContent=running?'Ⅱ 暫停觀察':p===1?'↻ 重新實驗':p>0?'▶ 繼續觀察':'▶ 反應 · '+d.action;
   q('.practice-controls').hidden=!manual;q('.solution-actions').hidden=d.id!=='solid';q('.dropper-actions').hidden=d.id!=='gas';
@@ -57,7 +57,7 @@ export function mountPhenomena(root,ctx){
   q('.drop-count').textContent='已滴入 '+practice.drops+' 滴 · 滴管剩餘 '+(PRACTICE_DROPS-practice.drops)+' 滴（示範容量）';
   q('.position-dropper').hidden=practice.dropperReady;q('.position-dropper').disabled=busy||p===1;
   q('.squeeze-dropper').disabled=!practice.dropperReady||practice.drops>=PRACTICE_DROPS;
-  q('.hands-on-hint').hidden=!manual;q('.hands-on-hint').textContent=d.id==='solid'?'拖曳或點選有標籤的試劑瓶 → 加入燒杯；兩種溶液皆無色。':'對準燒杯 → 按住滴加。也可按住空白鍵或 Enter。';
+  q('.hands-on-hint').hidden=!manual;q('.hands-on-hint').textContent=d.id==='solid'?'兩液皆無色；點選或拖曳試劑瓶加入。':'滴管可用空白鍵或 Enter 滴加。';
   qa('[data-practice-tool]').forEach(b=>{
    const tool=b.dataset.practiceTool,isDrop=tool==='dropper';b.hidden=isDrop?d.id!=='gas':d.id!=='solid';
    b.disabled=isDrop?practice.drops>=PRACTICE_DROPS:busy||practice.solutions.includes(tool);
