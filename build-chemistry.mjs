@@ -15,7 +15,9 @@ function visit(file){
  modules.push('__modules['+JSON.stringify(file)+']=(()=>{\n'+source+'\nreturn {'+exports.join(',')+'};\n})();');
 }
 visit('app.js');
-const script=("'use strict';\nconst __modules={};\n"+modules.join('\n')).replace(/src="\.\/assets\/time-vortex\.svg(?:\?v=[^"]+)?"/g,()=> 'src="'+image('./assets/time-vortex.svg')+'"');new vm.Script(script);
+const script=("'use strict';\nconst __modules={};\n"+modules.join('\n'))
+.replace(/src="\.\/assets\/time-vortex\.svg(?:\?v=[^"]+)?"/g,()=> 'src="'+image('./assets/time-vortex.svg')+'"')
+.replace(/(['"])\.\/assets\/(mole-specimens|magnesium-lab)\.png(?:\?v=[^'"]+)?\1/g,(_,quote,name)=>JSON.stringify(image('./assets/'+name+'.png')));new vm.Script(script);
 function image(file){const mime=file.endsWith('.svg')?'image/svg+xml':'image/png';return 'data:'+mime+';base64,'+fs.readFileSync(path.resolve(root,file)).toString('base64');}
 let css=['styles.css','polish.css','studio.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n').replace(/url\(['"]?((?:\.\.\/assets\/story\/|\.\/assets\/)[^)'"\s]+)['"]?\)/g,(_,file)=>'url("'+image(file)+'")');
 // Keep the entire module graph on one release, including returning visitors.

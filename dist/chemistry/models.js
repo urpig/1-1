@@ -1,3 +1,4 @@
+import { balanceCoach, balanceOrder, balanceSpeciesNames } from './balance-coach.js';
 import { mountBalanceDemonstration } from './balance-demo.js';
 import { prepareStudio } from './studio.js';
 import { elements, molecules, molecularMass, parseFormula, format, formulaHTML, reactions, atomLedger, equationHTML, convert, react, finite } from './core.js';
@@ -7,28 +8,28 @@ export function mountMolecule(root,ctx){
  let selected='H2O',counts={},angle=0,tilt=.3,zoom=1,compare='CO2',preview=false;
  root.classList.add('interactive-studio','molecule-studio');
  root.innerHTML=ExplorationWorkbench(
-  '<div class="studio-stage-label"><span>分子模型工作台</span><span>點選加入 · 拖曳旋轉</span></div><div class="molecule-art" tabindex="0" role="group" aria-label="分子旋轉區，拖曳或方向鍵旋轉"></div><div class="rack-heading"><b>拿取這個配方需要的原子</b><span>拿起一顆原子 · 可拖曳或點選</span></div><div class="element-rack"></div>',
-  '<label class="select-label">要組哪種物質？<select class="molecule-select">'+Object.entries(molecules).map(([f,m])=>'<option value="'+f+'">'+f+' · '+m.name+'</option>').join('')+'</select></label><div class="molecule-recipe"></div><div class="atom-counts"></div><div class="molecule-readout"></div><div class="activity-status" role="status"></div><div class="button-row model-tools"><button class="secondary clear">重新組裝</button><button class="text-button complete">看完整模型</button></div><details class="view-options"><summary>調整模型視角</summary>'+numberField('molecule-zoom','模型縮放',1,.65,1.35,.05,'倍')+'<div class="button-row"><button class="secondary rotate-left" aria-label="模型向左旋轉">↶ 向左</button><button class="secondary rotate-right" aria-label="模型向右旋轉">向右 ↷</button></div><button class="text-button reset-view">還原視角</button></details>',
-  '球棍示意；離子化合物僅顯示組成比例。');
+  '<div class="molecule-art" tabindex="0" role="group" aria-label="分子旋轉區，拖曳或方向鍵旋轉"></div><div class="rack-heading"><b>點選原子加入 · 拖曳模型旋轉</b></div><div class="element-rack"></div>',
+  '<label class="select-label">要組哪種物質？<select class="molecule-select">'+Object.entries(molecules).map(([f,m])=>'<option value="'+f+'">'+f+' · '+m.name+'</option>').join('')+'</select></label><div class="molecule-recipe"></div><div class="atom-counts"></div><div class="molecule-readout"></div><div class="activity-status" role="status"></div><div class="button-row model-tools"><button class="secondary clear">重新組裝</button><button class="text-button complete">看完整模型</button></div><details class="view-options"><summary>調整模型視角</summary>'+numberField('molecule-zoom','模型縮放',1,.65,1.35,.05,'倍')+'<div class="button-row"><button class="secondary rotate-left" aria-label="模型向左旋轉">↶ 向左</button><button class="secondary rotate-right" aria-label="模型向右旋轉">向右 ↷</button></div><button class="text-button reset-view">還原視角</button><p class="model-note">模型不按比例；離子化合物只示意組成比例。</p></details>',
+  '');
  root.insertAdjacentHTML('beforeend','<div class="observation-panel"><h3>比較兩種物質的相對質量</h3><label>比較對象 <select class="molecule-compare">'+Object.entries(molecules).map(([f,m])=>'<option value="'+f+'" '+(f===compare?'selected':'')+'>'+f+' · '+m.name+'</option>').join('')+'</select></label><div class="molecule-comparison"></div><details class="comparison-definition"><summary>深入了解：怎麼從質量比找原子量？</summary>待測原子的平均質量 ÷ 碳-12 原子質量＝待測元素原子量 ÷ 12。<br>例如氧：碳-12 的質量比約 4：3，氧原子量約為 12×4÷3＝16。使用同一標準時，兩元素的原子量比就是平均原子質量比。</details><details><summary>如果把比較標準加倍，原子真的變輕了嗎？</summary><div class="standard-demo"><p>原子本身沒有變重或變輕。下面只是試著換一把比較用的尺，不改課本採用的數值。</p><button class="secondary reference-toggle">把假想質量標準加倍</button><p class="reference-result">正式標準：碳-12 的相對質量是 12。</p><p>講義的另一種問法是「把碳-12 的相對數值改訂成 24」。那相當於把比較單位縮小一半，所有相對數值加倍；原子本身仍沒有變重，現行 1 mol 的粒子數也不變。</p></div></details></div>');
 
- prepareStudio(root,{number:'01',title:'分子組裝室'},ctx);
+ prepareStudio(root,{number:'01',title:'分子鍊成陣'},ctx);
  function done(){return Object.entries(parseFormula(selected)).every(([e,n])=>counts[e]===n);}
  function draw(){
   const m=molecules[selected],wanted=parseFormula(selected),missing=Object.entries(wanted).filter(([e,n])=>(counts[e]||0)<n),total=Object.values(wanted).reduce((a,b)=>a+b,0),placed=Object.values(counts).reduce((a,b)=>a+b,0),complete=done();
   root.dataset.complete=String(complete);
-  root.querySelector('.molecule-recipe').innerHTML='<div><span>照著化學式組裝</span><strong>'+formulaHTML(selected)+'</strong></div><div class="assembly-count"><b>'+placed+'<small> / '+total+'</small></b><span>原子已就位</span></div><progress max="'+total+'" value="'+placed+'" aria-label="原子組裝進度"></progress>';
+  root.querySelector('.molecule-recipe').innerHTML='<div><span>目標</span><strong>'+formulaHTML(selected)+'</strong></div><div class="assembly-count"><b>'+placed+'<small> / '+total+'</small></b><span>已加入</span></div><progress max="'+total+'" value="'+placed+'" aria-label="原子組裝進度"></progress>';
   root.querySelectorAll('[data-element]').forEach(b=>{const e=b.dataset.element,remaining=Math.max(0,(wanted[e]||0)-(counts[e]||0));b.disabled=!remaining;b.setAttribute('aria-label',elements[e].name+'：'+(remaining?'還要 '+remaining+' 個':'已放足'));b.dataset.needed=remaining?String(remaining):'';b.closest('.atom-supply').querySelector('.token-stock').textContent=remaining?'還需 '+remaining+' 個':'✓ 已放齊';});
-  guideStep(root,complete?'組好了！把每種原子的相對質量加起來':'加入'+missing.map(([e,n])=>(n-(counts[e]||0))+' 個'+elements[e].name+'原子').join('、'),complete?'查看右側加總算式。':'點選原子，或拖入虛線位置。',complete?'.molecule-readout':'[data-element="'+missing[0][0]+'"]');
+  guideStep(root,complete?'組裝完成，看質量加總':'還需：'+missing.map(([e,n])=>(n-(counts[e]||0))+' 個'+elements[e].name).join('、'),'',complete?'.molecule-readout':'[data-element="'+missing[0][0]+'"]');
   root.querySelector('.molecule-art').innerHTML=molecularSVG(m,{angle,tilt,zoom,counts});
   root.querySelector('.atom-counts').innerHTML=Object.entries(wanted).map(([e,n])=>'<div class="atom-line '+((counts[e]||0)===n?'is-filled':'')+'"><b style="--atom:'+elements[e].color+'">'+e+'</b><span>'+elements[e].name+'</span><strong>'+(counts[e]||0)+' / '+n+'</strong><button class="remove-atom" data-remove="'+e+'" aria-label="移除一個'+elements[e].name+'原子" '+(!(counts[e]>0)?'disabled':'')+'>−</button></div>').join('');
   root.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const e=b.dataset.remove;counts[e]=Math.max(0,(counts[e]||0)-1);draw();root.querySelector((counts[e]>0?'[data-remove="':'[data-element="')+e+'"]').focus({preventScroll:true});});
   const sum=Object.entries(counts).reduce((s,[e,n])=>s+n*elements[e].ar,0);
-  root.querySelector('.molecule-readout').innerHTML=''+metric(complete?(m.kind==='式單位'?'相對式量':'相對分子量'):'目前的相對質量總和',format(sum))+'<div class="atom-sum">'+Object.entries(wanted).map(([e])=>'<span style="--atom:'+elements[e].color+'"><i></i>'+(counts[e]||0)+' × '+elements[e].ar+'</span>').join('<b>＋</b>')+'<b>＝ '+format(sum)+'</b></div><p class="small">'+(complete?'':'尚未組好；這個加總還不是 '+selected+' 的'+(m.kind==='式單位'?'式量':'分子量')+'。')+'</p>'+(complete?'<div class="molar-handoff"><span>從一個微粒，連到一莫耳</span><b>1 mol '+formulaHTML(selected)+' → '+format(sum)+' g</b><p>莫耳質量約 '+format(sum)+' g/mol。</p></div>':'');
-  root.querySelector('.molecule-comparison').innerHTML='<div class="metrics">'+metric(formulaHTML(selected),format(molecularMass(selected)))+metric(formulaHTML(compare),format(molecularMass(compare)))+metric('前者 ÷ 後者',format(molecularMass(selected)/molecularMass(compare)),'倍')+'</div><p class="small">比較一個分子／式單位的相對質量；離子晶體以式單位比較。</p>';
-  notice(root,complete?'✓ 原子數正確，配方完成。':'組裝進度 '+placed+' / '+total+'。每點一次，就加入一個原子。');
+  root.querySelector('.molecule-readout').innerHTML=''+metric(complete?(m.kind==='式單位'?'相對式量':'相對分子量'):'目前加總',format(sum))+'<div class="atom-sum">'+Object.entries(wanted).map(([e])=>'<span style="--atom:'+elements[e].color+'"><i></i>'+(counts[e]||0)+' × '+elements[e].ar+'</span>').join('<b>＋</b>')+'<b>＝ '+format(sum)+'</b></div>'+(complete?'<div class="molar-handoff"><b>1 mol '+formulaHTML(selected)+' → '+format(sum)+' g</b></div>':'');
+  root.querySelector('.molecule-comparison').innerHTML='<div class="metrics">'+metric(formulaHTML(selected),format(molecularMass(selected)))+metric(formulaHTML(compare),format(molecularMass(compare)))+metric('前者 ÷ 後者',format(molecularMass(selected)/molecularMass(compare)),'倍')+'</div>';
+  notice(root,complete?'✓ 組裝完成':'');
   root.querySelector('.clear').textContent=preview?'換我組裝':'重新組裝';
-  if(complete&&preview)notice(root,'示範模型。按「換我組裝」完成操作。');
+  if(complete&&preview)notice(root,'示範模型；按「換我組裝」試試。');
   if(complete&&!preview&&!ctx.data.moleculeAssembled){ctx.data.moleculeAssembled=true;ctx.mark('assembled');}
  }
  function add(e){const wanted=parseFormula(selected);if(!wanted[e]||(counts[e]||0)>=wanted[e])return;counts[e]=(counts[e]||0)+1;draw();}
@@ -45,24 +46,57 @@ let doubled=false;root.querySelector('.reference-toggle').onclick=e=>{doubled=!d
  rack();draw();return{reset(){ctx.data.moleculeAssembled=false;preview=false;counts={};angle=0;tilt=.3;zoom=1;setZoom(1);draw();}};
 }
 export function mountBalancer(root,ctx){
-let id='water',coeff=[1,1,1],solved=new Set(ctx.data.balanced||[]);
-root.classList.add('balance-studio');
-root.innerHTML='<div class="equation-workbench"><div class="balance-top"><label>反應題目 <select class="balance-select">'+['water','magnesium','iron','peroxide'].map(id=>'<option value="'+id+'">'+reactions[id].name+'</option>').join('')+'</select></label><span class="balance-done"></span></div><div class="balance-alchemy"></div><div class="equation-controls" aria-label="只可修改係數"></div><details class="particle-view"><summary>看這些份數對應多少微粒</summary><div class="balance-models"></div><p class="model-note">每框代表一份物質；MgO、Fe₂O₃ 只表示組成比例，不是獨立分子。</p></details><div class="balance-ledger"></div><div class="button-row"><button class="secondary balance-hint">給我一個提示</button><button class="text-button balance-reset">重新配平</button><button class="primary balance-next" disabled>下一個反應 →</button></div><div class="activity-status" role="status"></div></div>';
-root.insertAdjacentHTML('beforeend','<details class="balance-method"><summary>不知道從哪裡開始？看配平的三步方法</summary><p>先根據實驗確認反應物和生成物的化學式，再調整係數。配平不能證明任意想像的反應一定會發生。</p><ol><li>先選一種物質，暫定它的係數為 1。常從組成較複雜的物質開始。</li><li>以水為例：先設 H₂O 為 1，配氫得到 H₂ 為 1，再配氧得到 O₂ 為 1/2。</li><li>整式乘 2：2H₂＋O₂→2H₂O；最後檢查每種原子數，再約成最簡整數比。</li></ol><p><b>反應前後總共有幾個分子，不一定相同。</b>水的例子是 3 個反應物分子形成 2 個水分子，但 H 仍為 4 個、O 仍為 2 個。</p><p>操作器最後只填正整數係數；不能改動下標。</p></details>');
-prepareStudio(root,{number:'03',title:'係數平衡'},ctx);
-const balanceDemo=mountBalanceDemonstration(root);
-function draw(){const r=reactions[id],ledger=atomLedger(r,coeff),all=[...r.left,...r.right];const matched=ledger.rows.filter(x=>x.left===x.right).length;
- root.querySelector('.balance-alchemy').innerHTML='<div class="balance-emblem">'+alchemySeal(matched+' / '+ledger.rows.length,'種元素已相等',matched/ledger.rows.length)+'</div><div><h3>'+(ledger.balanced?(ledger.minimal?'每種原子，都對上了。':'原子數相同，再約成最簡比。'):'讓左邊和右邊，一個都不差。')+'</h3><p>'+(ledger.balanced?all.map((f,i)=>coeff[i]+' mol '+formulaHTML(f)).join(' ： '):'用 ＋／− 調整係數，核對下方原子數。')+'</p></div>';
- root.querySelector('.equation-controls').innerHTML=all.map((f,i)=>(i===r.left.length?'<strong class="equation-arrow" aria-label="反應生成">→</strong>':i?'<span class="equation-plus">＋</span>':'')+'<div class="coefficient" data-side="'+(i<r.left.length?'reactant':'product')+'"><span class="species-side">'+(i<r.left.length?'反應物':'生成物')+'</span><b>'+formulaHTML(f)+'</b><div><button data-adjust="'+i+'" data-delta="-1" aria-label="減少 '+f+' 係數" '+(coeff[i]<=1?'disabled':'')+'>−</button><output aria-label="'+f+' 係數">'+coeff[i]+'</output><button data-adjust="'+i+'" data-delta="1" aria-label="增加 '+f+' 係數" '+(coeff[i]>=12?'disabled':'')+'>＋</button></div><span class="coefficient-unit">份</span><div class="coefficient-atoms">'+Object.entries(parseFormula(f)).map(([e,n])=>'<span><i style="background:'+elements[e].color+'"></i>'+e+' <b>'+n*coeff[i]+'</b></span>').join('')+'</div></div>').join('');
- root.querySelectorAll('[data-adjust]').forEach(b=>b.onclick=()=>{const focusLabel=b.getAttribute('aria-label');coeff[Number(b.dataset.adjust)]+=Number(b.dataset.delta);draw();[...root.querySelectorAll('[data-adjust]')].find(x=>x.getAttribute('aria-label')===focusLabel)?.focus();});root.querySelector('.balance-models').innerHTML=all.map((f,i)=>'<div class="particle-species"><small class="species-side">'+(i<r.left.length?'反應物':'生成物')+'</small><strong>'+coeff[i]+formulaHTML(f)+'</strong>'+particleGroup(f,coeff[i])+'</div>').join('');root.querySelector('.balance-ledger').innerHTML='<div class="ledger-title"><b>每種原子，一起核對</b><span>反應前 → 反應後</span></div>'+ledger.rows.map(x=>{const equal=x.left===x.right,max=Math.max(x.left,x.right,1);return '<div class="ledger-row '+(equal?'is-equal':'is-mismatch')+'"><span class="ledger-element" style="--atom:'+elements[x.e].color+'">'+x.e+'</span><div class="ledger-count"><span>左邊 <b>'+x.left+'</b></span><i style="--fill:'+x.left/max*100+'%"></i></div><div class="ledger-count"><span>右邊 <b>'+x.right+'</b></span><i style="--fill:'+x.right/max*100+'%"></i></div><strong class="ledger-verdict">'+(equal?'✓ 相等':(x.left>x.right?'右邊少 ':'左邊少 ')+Math.abs(x.left-x.right))+'</strong></div>';}).join('');
-root.querySelector('.balance-next').disabled=!(ledger.balanced&&ledger.minimal);root.querySelector('.balance-next').hidden=solved.size===4;
-if(ledger.balanced&&ledger.minimal){const first=!solved.has(id);solved.add(id);ctx.data.balanced=[...solved];ctx.save();notice(root,'平衡成功！每種元素的原子數相同，而且是最簡整數比。');if(first)ctx.mark('balanced-reaction');root.querySelector('.balance-next').hidden=solved.size===4;}
-else if(ledger.balanced)notice(root,'原子數對上了！再把係數一起除以相同的數，約成最簡整數比。');
-else notice(root,ledger.rows.filter(x=>x.left!==x.right).map(x=>x.e+'：左 '+x.left+'、右 '+x.right).join('；')+'。調整整組物質的係數。');
-guideStep(root,ledger.balanced?(ledger.minimal?'配平成功！下一步看莫耳數比':'原子數對上了，再把係數約小'):'先找左右數量不同的原子',ledger.balanced?'係數代表莫耳數的比例。換另一題再練習，不能把下標改掉。':'琥珀色的核對列會顯示哪一邊還少幾個。用 ＋／− 增減整份物質。',ledger.balanced?'.balance-select':'.equation-controls');root.querySelector('.balance-done').textContent='已完成 '+solved.size+' / 4 題';root.querySelector('.equation-workbench').classList.toggle('balanced',ledger.balanced&&ledger.minimal);}
-root.querySelector('.balance-next').onclick=()=>{const ids=['water','magnesium','iron','peroxide'];id=ids[(ids.indexOf(id)+1)%ids.length];coeff=reactions[id].coeff.map(()=>1);root.querySelector('.balance-select').value=id;draw();};
-root.querySelector('.balance-select').onchange=e=>{id=e.target.value;coeff=reactions[id].coeff.map(()=>1);draw();};root.querySelector('.balance-reset').onclick=()=>{coeff=coeff.map(()=>1);draw();};root.querySelector('.balance-hint').onclick=()=>{notice(root,{water:'右邊先放 2 份 H₂O，氧就和 1 份 O₂ 相等，再調整 H₂。',magnesium:'O₂ 有 2 個氧，先讓右側出現 2 份 MgO。',iron:'氧的最小公倍數是 6：試試 3O₂ 和 2Fe₂O₃，再配鐵。',peroxide:'先讓 H₂O₂ 與 H₂O 係數同為 2，剩下的氧組成 O₂。'}[id]);};
-draw();return{reset(){balanceDemo.reset();solved.clear();ctx.data.balanced=[];coeff=coeff.map(()=>1);draw();}};
+ let id='water',coeff=[1,1,1],solved=new Set((ctx.data.balanced||[]).filter(key=>balanceOrder.includes(key)));
+ root.classList.add('balance-studio');
+ root.innerHTML='<div class="equation-workbench"><div class="balance-top"><label>練習題目<select class="balance-select">'+balanceOrder.map((key,i)=>'<option value="'+key+'">'+(i+1)+' · '+reactions[key].name+'</option>').join('')+'</select></label><span class="balance-done"></span></div><div class="balance-alchemy"></div><p class="balance-one-rule"><b>只改前面的係數</b><span>化學式與下標保持不動</span></p><div class="equation-controls" aria-label="按加減鍵調整化學式前面的係數"></div><div class="balance-ledger"></div><div class="button-row balance-actions"><button class="secondary balance-hint">提示下一步</button><button class="text-button balance-reset">重新配平</button><button class="primary balance-next" disabled>下一題 →</button></div><div class="activity-status" role="status"></div><details class="particle-view"><summary>看粒子怎麼分組</summary><div class="balance-models"></div><p class="model-note">每框代表一份；MgO、Fe₂O₃ 只示意組成比例。</p></details></div>';
+ root.insertAdjacentHTML('beforeend','<details class="balance-method"><summary>配平小提醒</summary><ol><li>只調整化學式前面的係數。</li><li>逐種檢查原子數，讓左右一樣多。</li><li>係數若能一起約小，就寫成最簡整數比；1 通常省略。</li></ol><p>原子數不變，分子總數可以改變。</p></details>');
+ const bench=root.querySelector('.equation-workbench');
+ const shelf=document.createElement('section');shelf.className='balance-shelf specimen-shelf';shelf.setAttribute('aria-label','反應樣本架');
+ shelf.innerHTML='<div class="shelf-heading"><b>反應樣本架</b><span>點選或拖入操作台</span></div><div class="shelf-rail">'+balanceOrder.map(key=>'<button type="button" class="balance-sample" data-balance-sample="'+key+'" aria-pressed="false"><div class="specimen-vial" aria-hidden="true">'+particleGroup(reactions[key].left[0],1)+'</div><b>'+reactions[key].name+'</b><small class="sample-state">尚未完成</small></button>').join('')+'</div>';
+ bench.prepend(shelf);
+ const record=document.createElement('section');record.className='balance-records';record.setAttribute('aria-label','我的配平紀錄');bench.append(record);
+ prepareStudio(root,{number:'03',title:'反應式配平'},ctx);
+ const balanceDemo=mountBalanceDemonstration(root);
+ function draw(){
+  const reaction=reactions[id],ledger=atomLedger(id,coeff),formulas=[...reaction.left,...reaction.right],coach=balanceCoach(id,coeff);
+  const matched=ledger.rows.filter(row=>row.left===row.right).length,complete=ledger.balanced&&ledger.minimal;
+  root.querySelector('.balance-alchemy').innerHTML='<div class="balance-emblem">'+alchemySeal(matched+' / '+ledger.rows.length,'種原子相同',matched/ledger.rows.length)+'</div><div><h3>'+coach.title+'</h3><p>'+coach.detail+'</p></div>';
+  root.querySelector('.equation-controls').innerHTML=formulas.map((formula,i)=>(i===reaction.left.length?'<strong class="equation-arrow" aria-label="反應生成">→</strong>':i?'<span class="equation-plus">＋</span>':'')+'<div class="coefficient '+(i===coach.index?'is-suggested':'')+'" data-side="'+(i<reaction.left.length?'reactant':'product')+'"><span class="species-side">'+(i<reaction.left.length?'反應物':'生成物')+'</span><div class="coefficient-formula"><output aria-label="'+formula+' 係數">'+coeff[i]+'</output><b>'+formulaHTML(formula)+'</b></div><span class="coefficient-name">'+balanceSpeciesNames[formula]+'</span><div class="coefficient-buttons"><button data-adjust="'+i+'" data-delta="-1" aria-label="減少'+balanceSpeciesNames[formula]+'的係數" '+(coeff[i]<=1?'disabled':'')+'>−</button><span>係數</span><button data-adjust="'+i+'" data-delta="1" aria-label="增加'+balanceSpeciesNames[formula]+'的係數" '+(coeff[i]>=12?'disabled':'')+'>＋</button></div><div class="coefficient-atoms">'+Object.entries(parseFormula(formula)).map(([element,n])=>'<span><i style="background:'+elements[element].color+'"></i>'+element+' <b>'+n*coeff[i]+'</b></span>').join('')+'</div></div>').join('');
+  root.querySelectorAll('[data-adjust]').forEach(button=>button.onclick=()=>{
+   const index=Number(button.dataset.adjust),delta=Number(button.dataset.delta),focusLabel=button.getAttribute('aria-label');
+   if(!Number.isInteger(index)||index<0||index>=coeff.length||![-1,1].includes(delta))return;
+   coeff[index]=Math.max(1,Math.min(12,coeff[index]+delta));draw();
+   [...root.querySelectorAll('[data-adjust]')].find(item=>item.getAttribute('aria-label')===focusLabel)?.focus({preventScroll:true});
+  });
+  root.querySelector('.balance-models').innerHTML=formulas.map((formula,i)=>'<div class="particle-species"><strong>'+coeff[i]+formulaHTML(formula)+'</strong>'+particleGroup(formula,coeff[i])+'</div>').join('');
+  root.querySelector('.balance-ledger').innerHTML='<div class="ledger-title"><b>核對原子數</b><span>左邊＝右邊</span></div>'+ledger.rows.map(row=>{
+   const equal=row.left===row.right,max=Math.max(row.left,row.right,1);
+   return '<div class="ledger-row '+(equal?'is-equal':'is-mismatch')+'"><span class="ledger-element" aria-label="'+elements[row.e].name+'原子" style="--atom:'+elements[row.e].color+'">'+row.e+'</span><div class="ledger-count"><span>左邊 <b>'+row.left+'</b></span><i style="--fill:'+row.left/max*100+'%"></i></div><div class="ledger-count"><span>右邊 <b>'+row.right+'</b></span><i style="--fill:'+row.right/max*100+'%"></i></div><strong class="ledger-verdict">'+(equal?'✓ 相同':(row.left>row.right?'右邊少 ':'左邊少 ')+Math.abs(row.left-row.right)+' 個')+'</strong></div>';
+  }).join('');
+  notice(root,'');
+  if(complete){
+   const first=!solved.has(id);solved.add(id);ctx.data.balanced=[...solved];ctx.save();
+   if(first)ctx.mark('balanced-reaction');
+  }
+  const next=root.querySelector('.balance-next');next.disabled=!complete;next.hidden=false;
+  next.textContent=solved.size===balanceOrder.length?'四題完成，答一題 →':'完成這題，下一題 →';
+  root.querySelector('.balance-done').textContent='已完成 '+solved.size+' / '+balanceOrder.length;
+  root.querySelector('.equation-workbench').classList.toggle('balanced',complete);
+  root.querySelectorAll('[data-balance-sample]').forEach(button=>{const key=button.dataset.balanceSample;button.setAttribute('aria-pressed',String(key===id));button.querySelector('.sample-state').textContent=solved.has(key)?'✓ 已配平':'拿取這一題';});
+  record.innerHTML='<h4>我的配平紀錄</h4><table><thead><tr><th>反應</th><th>最簡係數比</th><th>原子核對</th></tr></thead><tbody>'+balanceOrder.map(key=>'<tr><th>'+reactions[key].name+'</th><td>'+(solved.has(key)?reactions[key].coeff.join('：'):'—')+'</td><td>'+(solved.has(key)?'✓ 相同':'尚未完成')+'</td></tr>').join('')+'</tbody></table>';
+
+ }
+ root.querySelector('.balance-next').onclick=()=>{
+  const ledger=atomLedger(id,coeff);if(!ledger.balanced||!ledger.minimal)return;
+  if(solved.size===balanceOrder.length){const quiz=root.closest('.learning-card')?.querySelector(':scope > .card-body > .quiz');quiz?.scrollIntoView({behavior:'auto',block:'start'});quiz?.querySelector('input')?.focus({preventScroll:true});return;}
+  id=balanceOrder.find(key=>!solved.has(key));coeff=reactions[id].coeff.map(()=>1);root.querySelector('.balance-select').value=id;draw();
+ };
+ function chooseReaction(key){if(!balanceOrder.includes(key))return;id=key;coeff=reactions[id].coeff.map(()=>1);root.querySelector('.balance-select').value=id;draw();}
+ root.querySelector('.balance-select').onchange=event=>chooseReaction(event.target.value);
+ root.querySelectorAll('[data-balance-sample]').forEach(button=>makeDraggable(button,root.querySelector('.equation-controls'),()=>chooseReaction(button.dataset.balanceSample),root.querySelector('.activity-status')));
+ root.querySelector('.balance-reset').onclick=()=>{coeff=coeff.map(()=>1);draw();};
+ root.querySelector('.balance-hint').onclick=()=>notice(root,balanceCoach(id,coeff).hint);
+ draw();return{reset(){balanceDemo.reset();solved.clear();ctx.data.balanced=[];id='water';coeff=[1,1,1];root.querySelector('.balance-select').value=id;draw();}};
 }
 export function mountStoich(root,ctx){
  root.classList.add('stoich-studio');

@@ -12,13 +12,12 @@ let visible=atoms;
 if(counts){const used={};visible=atoms.filter(a=>(used[a.e]=(used[a.e]||0)+1)<= (counts[a.e]||0));}
 const visibleIds=new Set(visible.map(a=>a.i));
 let s='<defs><radialGradient id="model-room" cx="48%" cy="40%" r="75%"><stop stop-color="#fcfdf8"/><stop offset="1" stop-color="#e5eee6"/></radialGradient><radialGradient id="model-floor"><stop stop-color="#a5bbac" stop-opacity=".28"/><stop offset="1" stop-color="#a5bbac" stop-opacity="0"/></radialGradient></defs><rect width="760" height="440" rx="14" fill="url(#model-room)"/><ellipse cx="380" cy="355" rx="265" ry="50" fill="url(#model-floor)"/><path d="M80 370H680M100 390H660" stroke="#829e8c" stroke-opacity=".12"/>';
-s+='<g color="#a49261" opacity=".50">'+alchemyRing(380,207,168,visible.length/model.atoms.length)+'</g>'+label(380,38,'拖曳旋轉 · 方向鍵也能操作',13,'#526c5b');for(const a of atoms.filter(a=>!visibleIds.has(a.i)))s+='<circle class="atom-socket" cx="'+a.x+'" cy="'+a.y+'" r="'+(a.e==='H'?22:36)*zoom+'" fill="#ffffff70" stroke="#829a89" stroke-width="1.5" stroke-dasharray="4 5"/>'+label(a.x,a.y+5,a.e,16,'#506854');
+s+='<g color="#a49261" opacity=".50">'+alchemyRing(380,207,168,visible.length/model.atoms.length)+'</g>';for(const a of atoms.filter(a=>!visibleIds.has(a.i)))s+='<circle class="atom-socket" cx="'+a.x+'" cy="'+a.y+'" r="'+(a.e==='H'?22:36)*zoom+'" fill="#ffffff70" stroke="#829a89" stroke-width="1.5" stroke-dasharray="4 5"/>'+label(a.x,a.y+5,a.e,16,'#506854');
 for(const [a,b]of model.bonds)if(visibleIds.has(a)&&visibleIds.has(b))s+='<line x1="'+atoms[a].x+'" y1="'+atoms[a].y+'" x2="'+atoms[b].x+'" y2="'+atoms[b].y+'" stroke="#9eb0a2" stroke-width="'+(15*zoom)+'" stroke-linecap="round"/>';
 for(const a of visible.sort((a,b)=>a.z-b.z)){const radius=(a.e==='H'?22:36)*zoom*(1+a.z*.06),col=elements[a.e].color;
 s+='<ellipse cx="'+(a.x+5)+'" cy="'+(a.y+39*zoom)+'" rx="'+(radius*.8)+'" ry="'+(radius*.2)+'" fill="#091d16" opacity=".3"/><defs><radialGradient id="atom-'+a.i+'" cx="30%" cy="25%"><stop stop-color="#fff"/><stop offset=".32" stop-color="'+col+'"/><stop offset="1" stop-color="'+col+'" stop-opacity=".8"/></radialGradient></defs><circle cx="'+a.x+'" cy="'+a.y+'" r="'+radius+'" fill="url(#atom-'+a.i+')" stroke="#536e65" stroke-opacity=".4" stroke-width="1.5"/>'+label(a.x,a.y+6,a.e,18*zoom,a.e==='C'?'#fff':'#233e36');
 }
-s+=label(380,400,model.kind==='式單位'?'組成比例示意 · 不是獨立分子或實際晶格':'球棍模型 · 原子大小與鍵長為教學示意',13,'#586f5b');
-return svgFrame(s,'可旋轉的'+model.name+model.kind+'模型');
+return svgFrame(s,'可旋轉的'+model.name+model.kind+'模型；尺寸不按比例'+(model.kind==='式單位'?'，僅示意組成比例，非獨立分子或實際晶格':''));
 }
 export function particleGroup(formula,count){
  const list=Object.entries(parseFormula(formula)).flatMap(([e,n])=>Array(n).fill(e));

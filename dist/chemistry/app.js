@@ -1,6 +1,7 @@
+import { notebookMarkup } from './notebook.js';
 import { mountFoundationStudio } from './foundation-studio.js';
 import { mountPhenomena } from './phenomena.js';
-import { foundationLesson, equationLesson, mountFoundationCheck, mountFoundationSteps } from './lesson-intro.js';
+import { foundationLesson, equationLesson, mountFoundationSteps } from './lesson-intro.js';
 import { mountPolish } from './polish.js';
 import { handoutPractice } from './handout-practice-data.js';
 import { TermPrimer, mountTerminology } from './terminology.js';
@@ -59,32 +60,33 @@ export function StoryDialogue(dialogue){
  const expressions={wonder:'好奇',curious:'思考',excited:'興奮',mentor:'引導',surprised:'驚訝',idea:'靈機一動',thoughtful:'沉思',thinking:'思考',gentle:'溫和',determined:'堅定',encourage:'鼓勵'};
  return '<div class="story-dialogue">'+dialogue.map(([who,expression,text])=>'<div class="story-speech story-speech--'+who+'"><span class="story-portrait story-portrait--'+who+'" data-expression="'+expression+'" role="img" aria-label="'+({kui:'小葵',grandpa:'阿公',leon:'里昂'}[who])+'的'+(expressions[expression]||'說話')+'表情"></span><p><b>'+({kui:'小葵',grandpa:'阿公',leon:'里昂'}[who])+'</b>'+text+'</p></div>').join('')+'</div>';
 }
-export function ScienceExplanation(c,cls='science-explanation'){return '<div class="'+cls+'" '+(state.observed.includes(c.id)?'':'hidden')+'><span class="eyebrow">記住這幾點</span><ul class="lesson-key-points">'+c.keyPoints.map(p=>'<li>'+p+'</li>').join('')+'</ul><details class="explanation-depth"><summary>深入了解</summary>'+c.explanation.map(p=>'<p>'+p+'</p>').join('')+'</details></div>';}
+export function ScienceExplanation(c,cls='science-explanation'){return notebookMarkup(c,cls);}
+function quizFor(c,el){return el.querySelector('[data-quiz-for="'+c.id+'"]');}
 function quizMarkup(c){
  const unlocked=state.observed.includes(c.id);
- return '<section class="quiz" aria-labelledby="quiz-title-'+c.id+'"><span class="eyebrow">小試身手</span><h3 id="quiz-title-'+c.id+'">'+c.quiz.q+'</h3><div class="quiz-lock" '+(unlocked?'hidden':'')+'>先完成上面的操作，再來試這一題。</div><fieldset '+(unlocked?'':'disabled')+'><legend class="sr-only">'+c.quiz.q+'</legend>'+c.quiz.options.map((o,i)=>'<label class="quiz-option"><input type="radio" name="quiz-'+c.id+'" value="'+i+'" '+(state.answers[c.id]===i?'checked':'')+'><span>'+String.fromCharCode(65+i)+'</span>'+o+'</label>').join('')+'<button class="primary submit-quiz">檢查答案</button></fieldset><div class="quiz-feedback" role="status"></div></section>';
+ return '<section class="quiz" data-quiz-for="'+c.id+'" aria-labelledby="quiz-title-'+c.id+'"><span class="eyebrow">小試身手</span><h3 id="quiz-title-'+c.id+'">'+c.quiz.q+'</h3><div class="quiz-lock" '+(unlocked?'hidden':'')+'>先完成上面的操作，再來試這一題。</div><fieldset '+(unlocked?'':'disabled')+'><legend class="sr-only">'+c.quiz.q+'</legend>'+c.quiz.options.map((o,i)=>'<label class="quiz-option"><input type="radio" name="quiz-'+c.id+'" value="'+i+'" '+(state.answers[c.id]===i?'checked':'')+'><span>'+String.fromCharCode(65+i)+'</span>'+o+'</label>').join('')+'<button class="primary submit-quiz">檢查答案</button></fieldset><div class="quiz-feedback" role="status"></div></section>';
 }
 function extrasMarkup(c){if(!c.extras.length)return '';const ending=c.extras.length===1&&c.extras[0]===12;return '<section class="supporting-section" aria-label="融入本卡的圖解與練習"><div class="supporting-heading"><h3>'+(ending?'冒險的最後一個問題':'把剛剛的發現，再想深一點')+'</h3><p>'+(ending?'選修結局：檢查點金傳說。':'選修，不影響本站完成。')+'</p></div>'+c.extras.map(id=>{const e=supplementCards.find(x=>x.sourceId===id),content='<div class="supporting-body"><p class="supporting-question">'+e.question+'</p><p>'+e.story+'</p><div class="supporting-activity"></div>'+ScienceExplanation(e,'supporting-explanation')+quizMarkup(e)+'</div>';return id===12?'<section class="supporting-detail ending-open" data-extra="12"><header class="ending-heading"><h3>'+supplementTitles[id]+'</h3><small data-extra-status="'+e.id+'"></small></header>'+content+'</section>':'<details class="supporting-detail" data-extra="'+id+'"><summary><span>'+supplementTitles[id]+'</span><small data-extra-status="'+e.id+'"></small></summary>'+content+'</details>';}).join('')+'</section>';}
 function render(){
  document.querySelector('#story-ending').innerHTML='<h2 id="story-ending-title">'+escapeHTML(returnJourney.title)+'</h2><p>'+escapeHTML(returnJourney.opening)+'</p><figure class="ending-art"><img src="./assets/time-vortex.svg?v=d434d339e527" alt="古代煉金工坊裡，左側里昂握住右側小葵的手；中間的阿公一手握著時空裝置，另一手抓住小葵的前臂，合力抵抗身後的藍綠色亂流。" width="1536" height="1024" loading="lazy" decoding="async"></figure>'+StoryDialogue(returnJourney.dialogue)+'<p>'+escapeHTML(returnJourney.ending)+'</p><p class="epilogue-question"><b>'+escapeHTML(returnJourney.question)+'</b><span>未完待續</span></p>';
 
  document.querySelector('#chapter-route').innerHTML=cards.map((c,index)=>'<a href="#chem-'+c.id+'" data-nav="'+c.id+'"><span>'+String(index+1).padStart(2,'0')+'</span><span>'+c.title+'</span><b class="nav-state">○</b></a>').join('');
- document.querySelector('#lesson').innerHTML=cards.map((c,index)=>'<article class="learning-card" id="chem-'+c.id+'" aria-labelledby="title-'+c.id+'"><header class="card-header"><div class="card-kicker"><span>第'+['一','二','三','四','五'][index]+'站</span></div><h2 id="title-'+c.id+'">'+c.title+'</h2><p class="core-question">'+c.question+'</p></header><div class="card-body"><p class="story-opening">'+c.story+'</p>'+StoryDialogue(c.dialogue)+(c.id===3?foundationLesson():TermPrimer(c.id))+(c.id===4?equationLesson():'')+'<div class="activity" data-activity="'+c.id+'"></div>'+ScienceExplanation(c)+quizMarkup(c)+'<div class="lesson-checkpoints" aria-label="本站學習清單"></div>'+extrasMarkup(c)+'<div class="chapter-bridge"><p>'+c.bridge+'</p></div></div><footer class="card-footer">'+(index>0?'<a href="#chem-'+cards[index-1].id+'">← 上一站</a>':'<span></span>')+'<button class="text-button reset-card">重設本卡</button>'+(index<cards.length-1?'<a class="next-link" href="#chem-'+cards[index+1].id+'">下一站 →</a>':'<a class="next-link" href="#story-ending">閱讀故事結尾 →</a>')+'</footer></article>').join('');
+ document.querySelector('#lesson').innerHTML=cards.map((c,index)=>'<article class="learning-card" id="chem-'+c.id+'" aria-labelledby="title-'+c.id+'"><header class="card-header"><div class="card-kicker"><span>第'+['一','二','三','四','五'][index]+'站</span></div><h2 id="title-'+c.id+'">'+c.title+'</h2><p class="core-question">'+c.question+'</p></header><div class="card-body"><p class="story-opening">'+c.story+'</p>'+StoryDialogue(c.dialogue)+(c.id===3?foundationLesson():TermPrimer(c.id))+(c.id===4?equationLesson():'')+'<div class="activity" data-activity="'+c.id+'"></div>'+extrasMarkup(c)+'<div class="chapter-bridge"><p>'+c.bridge+'</p></div><div class="lesson-checkpoints" aria-label="本站學習清單"></div>'+ScienceExplanation(c)+quizMarkup(c)+'</div><footer class="card-footer">'+(index>0?'<a href="#chem-'+cards[index-1].id+'">← 上一站</a>':'<span></span>')+'<button class="text-button reset-card">重設本卡</button>'+(index<cards.length-1?'<a class="next-link" href="#chem-'+cards[index+1].id+'">下一站 →</a>':'<a class="next-link" href="#story-ending">閱讀故事結尾 →</a>')+'</footer></article>').join('');
 }
 function reveal(c,el,cls='.science-explanation'){
- el.querySelector(cls).hidden=false;el.querySelector('.quiz-lock').hidden=true;el.querySelector('.quiz fieldset').disabled=false;ChapterProgress();
+ el.querySelector(cls).hidden=false;quizFor(c,el).querySelector('.quiz-lock').hidden=true;quizFor(c,el).querySelector('fieldset').disabled=false;ChapterProgress();
 }
 export function QuizFeedback(c,el,index,activitySelector='.activity'){
- const ok=index===c.quiz.answer,feedback=el.querySelector('.quiz-feedback');
+ const ok=index===c.quiz.answer,feedback=quizFor(c,el).querySelector('.quiz-feedback');
  feedback.className='quiz-feedback '+(ok?'correct':'incorrect');
  feedback.innerHTML='<strong>'+(ok?'✓ 你抓到關鍵了':'再想一步，你可以修正答案')+'</strong><p>'+(ok?c.quiz.reason:quizHint(c.id))+'</p>'+(ok?'':'<details class="solution-reveal"><summary>需要幫忙？看完整解析</summary><p><b>正確答案：'+c.quiz.options[c.quiz.answer]+'</b></p><p>'+c.quiz.reason+'</p></details>')+'<button class="secondary retry-quiz">再試一次</button><button class="text-button revisit-model">回到本段觀察</button>';
- feedback.querySelector('.retry-quiz').onclick=()=>{el.querySelector('.quiz').querySelectorAll('input').forEach(x=>x.checked=false);delete state.answers[c.id];save();ChapterProgress();feedback.innerHTML='';el.querySelector('.quiz input')?.focus({preventScroll:true});};
+ feedback.querySelector('.retry-quiz').onclick=()=>{quizFor(c,el).querySelectorAll('input').forEach(x=>x.checked=false);delete state.answers[c.id];save();ChapterProgress();feedback.innerHTML='';quizFor(c,el).querySelector('input')?.focus({preventScroll:true});};
  feedback.querySelector('.revisit-model').onclick=()=>{if(activitySelector==='.activity')el.querySelector('.foundation-lesson')?.dispatchEvent(new Event('foundation:activity'));el.querySelector(activitySelector).scrollIntoView({behavior:state.reduced?'auto':'smooth',block:'start'});};
 }
 function bindQuiz(c,el,activitySelector='.activity'){
- el.querySelector('.submit-quiz').onclick=()=>{
-  const checked=el.querySelector('.quiz').querySelector('input:checked');
-  if(!checked){el.querySelector('.quiz-feedback').textContent='先選一個答案，再查看解析。';return;}
+ quizFor(c,el).querySelector('.submit-quiz').onclick=()=>{
+  const checked=quizFor(c,el).querySelector('input:checked');
+  if(!checked){quizFor(c,el).querySelector('.quiz-feedback').textContent='先選一個答案，再查看解析。';return;}
   const index=Number(checked.value);state.answers[c.id]=index;
   (state.attempts[c.id]??=[]).push({answer:index,correct:index===c.quiz.answer,at:Date.now()});
   state.attempts[c.id]=state.attempts[c.id].slice(-20);save();QuizFeedback(c,el,index,activitySelector);ChapterProgress();
@@ -93,10 +95,10 @@ function bindQuiz(c,el,activitySelector='.activity'){
 }
 render();
 const foundationRoot=document.querySelector('.foundation-lesson');
-const foundationCheck=mountFoundationCheck(foundationRoot),foundationStudio=mountFoundationStudio(foundationRoot);
+const foundationStudio=mountFoundationStudio(foundationRoot);
 const foundationSteps=mountFoundationSteps(foundationRoot,{
  onChange(step){if(step!==2)foundationStudio.pause();},
- finish(){if(!activityComplete(3,state.data)){foundationSteps.show(1);return;}const quiz=document.querySelector('#chem-3 .quiz');quiz.scrollIntoView({behavior:'auto',block:'start'});quiz.querySelector('input')?.focus({preventScroll:true});}
+ finish(){if(!activityComplete(3,state.data)){foundationSteps.show(1);return;}const quiz=document.querySelector('#chem-3 > .card-body > .quiz');quiz.scrollIntoView({behavior:'auto',block:'start'});quiz.querySelector('input')?.focus({preventScroll:true});}
 });
 foundationRoot.addEventListener('foundation:activity',()=>foundationSteps.show(1,false));
 for(const c of cards){
@@ -115,8 +117,8 @@ for(const c of cards){
  el.querySelector('.reset-card').onclick=()=>{
   const ids=[c.id,...c.extras.map(id=>'extra-'+id)];state.observed=state.observed.filter(id=>!ids.includes(id));
   ids.forEach(id=>{delete state.answers[id];delete state.attempts[id];});
-  activities.get(c.id)?.reset();if(c.id===3){foundationCheck.reset();foundationStudio.reset();foundationSteps.reset();}c.extras.forEach(id=>extraActivities.get(id)?.reset());
-  el.querySelectorAll('.science-explanation,.supporting-explanation').forEach(x=>x.hidden=true);
+  activities.get(c.id)?.reset();if(c.id===3){foundationStudio.reset();foundationSteps.reset();}c.extras.forEach(id=>extraActivities.get(id)?.reset());
+  el.querySelectorAll('.science-explanation,.supporting-explanation').forEach(x=>x.hidden=false);
   el.querySelectorAll('.quiz-lock').forEach(x=>x.hidden=false);
   el.querySelectorAll('.quiz fieldset').forEach(x=>x.disabled=true);
   el.querySelectorAll('.quiz input').forEach(x=>x.checked=false);
@@ -146,7 +148,7 @@ document.addEventListener('click',e=>{
  const card=button.closest('.learning-card'),action=button.dataset.studentGo,index=cards.findIndex(c=>'chem-'+c.id===card.id);
  const dialog=card.querySelector('dialog[open]');if(dialog)dialog.close();
  requestAnimationFrame(()=>{
-  const target=action==='next'?(index<cards.length-1?document.querySelector('#chem-'+cards[index+1].id):(cards.every(mastered)?document.querySelector('#completion-banner'):document.querySelector('#chem-'+cards.find(c=>!mastered(c)).id))):card.querySelector('.'+action);
+  const target=action==='next'?(index<cards.length-1?document.querySelector('#chem-'+cards[index+1].id):(cards.every(mastered)?document.querySelector('#completion-banner'):document.querySelector('#chem-'+cards.find(c=>!mastered(c)).id))):card.querySelector(action==='quiz'?':scope > .card-body > .quiz':'.'+action);
   if(!target||target.hidden)return;if(action==='activity')card.querySelector('.foundation-lesson')?.dispatchEvent(new Event('foundation:activity'));target.scrollIntoView({behavior:state.reduced?'auto':'smooth',block:'start'});target.setAttribute('tabindex','-1');target.focus({preventScroll:true});
  });
 });

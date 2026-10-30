@@ -1,4 +1,7 @@
 export const PRACTICE_DROPS=12;
+export function createHeatingPractice(){return {loaded:false,lit:false};}
+export function loadHeatingSample(state){if(state.loaded)return false;state.loaded=true;return true;}
+export function setHeatingFlame(state,lit){if(lit&&!state.loaded)return false;const changed=state.lit!==!!lit;state.lit=!!lit;return changed;}
 // Shared state for instrument controls, drawings and completion checks.
 export function createReactionPractice(){return {solutions:[],dropperReady:false,drops:0};}
 export function addPracticeSolution(state,id){

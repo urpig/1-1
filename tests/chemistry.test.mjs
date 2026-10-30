@@ -5,9 +5,18 @@ import {cleanData} from '../dist/chemistry/state.js';
 import {reactionClock} from '../dist/chemistry/components.js';
 import {svgFrame} from '../dist/chemistry/art.js';
 import {cards,lessons,supplementCards,practiceProblems} from '../dist/chemistry/data.js';
-import {teachingIsotopes,nucleusParticles,countedNucleus,molePack,createPackingPlayer,mountFoundationStudio,waterPackingSVG,createMoleZoom} from '../dist/chemistry/foundation-studio.js';
+import {notebookMarkup} from '../dist/chemistry/notebook.js';
+import {teachingIsotopes,nucleusParticles,atomExplorerMarkup,moleSamples,molePack,createPackingPlayer,mountFoundationStudio,waterPackingSVG,createMoleZoom,moleZoomSVG,waterZoomSVG,molePackingMarkup,moleBundlesMarkup,MOLE_ZOOM_STEPS} from '../dist/chemistry/foundation-studio.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8, a+' ≠ '+b);
-test('counting nuclei preserves isotope composition, including hydrogen without a neutron',()=>{
+test('every main and supplemental card has a visible Xiaokui notebook containing its own lesson points',()=>{
+ for(const card of [...cards,...supplementCards]){
+  const notebook=notebookMarkup(card);
+  assert.ok(notebook.includes('<h3>小葵的筆記</h3>'));
+  assert.ok(!/\shidden(?:[\s=>])/.test(notebook));
+  for(const point of card.keyPoints)assert.ok(notebook.includes('<li>'+point+'</li>'));
+ }
+});
+test('nucleus models preserve isotope composition, including hydrogen without a neutron',()=>{
  for(const [symbol,p,n]of [['C',6,6],['H',1,0],['O',8,8]]){
   const particles=nucleusParticles(symbol);
   assert.equal(particles.filter(x=>x.kind==='proton').length,p);
@@ -15,25 +24,82 @@ test('counting nuclei preserves isotope composition, including hydrogen without 
   assert.equal(new Set(particles.map(x=>x.id)).size,p+n);
   assert.ok(particles.every(x=>Number.isFinite(x.x)&&Number.isFinite(x.y)));
   assert.equal(teachingIsotopes[symbol].protons+teachingIsotopes[symbol].neutrons,p+n);
-  const marked=particles.map(x=>x.id);
-  assert.deepEqual(countedNucleus(symbol,marked.concat(marked,'electron-1')),{protons:p,neutrons:n,complete:true});
-  assert.equal(countedNucleus(symbol,marked.slice(1)).complete,false);
  }
- assert.deepEqual(countedNucleus('H',[]),{protons:0,neutrons:0,complete:false});
+});
+test('C H O comparison shows every nucleus, its particle counts and atomic weight without counting controls',()=>{
+ const markup=atomExplorerMarkup();
+ assert.ok(!markup.includes('<button'));assert.ok(!/\shidden(?:[\s=>])/.test(markup));
+ const cards=[...markup.matchAll(/<section class="atom-comparison-card"[^>]*data-atom="([CHO])">([\s\S]*?)<\/section>/g)];
+ assert.deepEqual(cards.map(x=>x[1]),['C','H','O']);
+ for(const [symbol,p,n,ar] of [['C',6,6,12],['H',1,0,1],['O',8,8,16]]){
+  const card=cards.find(x=>x[1]===symbol)[2];
+  assert.equal((card.match(/data-nuclear-particle="proton"/g)||[]).length,p);
+  assert.equal((card.match(/data-nuclear-particle="neutron"/g)||[]).length,n);
+  assert.equal((card.match(/data-electron="true"/g)||[]).length,p,'neutral atoms have one electron per proton');
+  const shells=[...card.matchAll(/data-electron-shell="\d"([\s\S]*?)(?=<g data-electron-shell|<g class="atom-nucleus")/g)];
+  assert.deepEqual(shells.map(x=>(x[1].match(/data-electron="true"/g)||[]).length),p===1?[1]:[2,p-2]);
+  assert.ok(card.includes('<dd>'+p+'<small> 顆'));assert.ok(card.includes('<dd>'+n+'<small> 顆'));
+  assert.ok(card.includes('<span>原子量</span><strong>'+ar+'</strong>'));
+ }
 });
 test('water mole packs scale particle number and mass together without changing molecular mass',()=>{
  for(const amount of [.5,1,2]){const pack=molePack(amount);assert.equal(pack.amount,amount);assert.equal(pack.particles,amount*CLASS_NA);assert.equal(pack.mass,amount*18);assert.equal(pack.mass/pack.amount,molecularMass('H2O'));}
  assert.equal(molePack(2).particles,2*molePack().particles);
 });
-test('wheel zoom supports mouse notches, trackpads and line or page deltas without trapping boundary scroll',()=>{
+test('equal moles of carbon atoms, hydrogen molecules and water molecules share particle counts but have distinct masses',()=>{
+ for(const amount of [1,2,3,10]){
+  for(const [formula,mass]of [['C',12],['H2',2],['H2O',18]]){
+   const pack=molePack(amount,formula);assert.equal(pack.particles,amount*CLASS_NA);assert.equal(pack.mass,amount*mass);
+  }
+ }
+ assert.equal(moleSamples.C.unit,'原子');assert.equal(moleSamples.H2.particle,'氫氣分子');
+ const markup=molePackingMarkup();for(const formula of ['H2O','C','H2'])assert.ok(markup.includes('data-mole-sample="'+formula+'"'));
+});
+test('carbon uses single atoms and hydrogen uses H2 pairs throughout seven widening fields',()=>{
+ for(const formula of ['C','H2']){
+  let previous=new Set();
+  for(let level=0;level<7;level++){
+   const svg=moleZoomSVG(level,formula),ids=new Set([...svg.matchAll(/data-particle="([^"]+)"/g)].map(x=>x[1]));
+   assert.ok(ids.size>previous.size);for(const id of previous)assert.ok(ids.has(id));previous=ids;
+   assert.equal((svg.match(/data-element="C"/g)||[]).length,formula==='C'?1:0);
+   assert.equal((svg.match(/data-element="H"/g)||[]).length,formula==='H2'?2:0);
+   assert.ok(!svg.includes('data-element="O"'));
+  }
+  assert.equal(moleZoomSVG(7,formula),moleZoomSVG(6,formula));
+ }
+});
+test('seven wheel notches reveal the cup only at the seventh, with reversible levels and bounded scroll',()=>{
  const zoom=createMoleZoom(()=>{});
  assert.equal(zoom.wheel(-100),false);assert.equal(zoom.value,0);
- for(let i=0;i<4;i++)zoom.wheel(25);assert.equal(zoom.value,1);
- assert.equal(zoom.wheel(100),false);zoom.wheel(-100);assert.equal(zoom.value,0);
- zoom.wheel(120);assert.equal(zoom.value,1);
- zoom.reset();zoom.wheel(7.5,1);assert.equal(zoom.value,1);
- zoom.reset();zoom.wheel(1,2);assert.equal(zoom.value,1);
- assert.equal(zoom.wheel(NaN),false);zoom.set(-10);assert.equal(zoom.value,0);zoom.set(4);assert.equal(zoom.value,1);
+ for(let i=1;i<=6;i++){assert.equal(zoom.wheel(i%2?100:120),true);assert.equal(zoom.step,i);assert.equal(zoom.value,i/7);assert.ok(zoom.value<1);}
+ zoom.wheel(6000);assert.equal(zoom.step,7,'even a coalesced large event advances only one level');assert.equal(zoom.value,1);
+ assert.equal(zoom.wheel(100),false);
+ for(let i=6;i>=0;i--){zoom.wheel(-120);assert.equal(zoom.step,i);}
+ for(const mode of [1,2]){zoom.reset();for(let i=1;i<=7;i++){zoom.wheel(3,mode);assert.equal(zoom.step,i);}}
+ zoom.reset();for(let i=0;i<3;i++){assert.equal(zoom.wheel(25),true);assert.equal(zoom.step,0);}zoom.wheel(25);assert.equal(zoom.step,1);
+ zoom.wheel(25);zoom.wheel(25);zoom.wheel(-25);zoom.wheel(-25);zoom.wheel(-25);assert.equal(zoom.step,1,'changing direction clears the previous partial gesture');zoom.wheel(-25);assert.equal(zoom.step,0);
+ assert.equal(zoom.wheel(NaN),false);assert.equal(zoom.wheel(0),false);zoom.set(-10);assert.equal(zoom.value,0);zoom.set(4);assert.equal(zoom.value,1);zoom.reset();assert.equal(zoom.step,0);
+});
+test('each wider microscopic field contains more smaller molecules and preserves those already in view',()=>{
+ let previous=new Set(),previousScale=Infinity;
+ for(let level=0;level<MOLE_ZOOM_STEPS;level++){
+  const svg=waterZoomSVG(level),ids=new Set([...svg.matchAll(/data-water="([^"]+)"/g)].map(m=>m[1]));
+  assert.ok(ids.size>previous.size);for(const id of previous)assert.ok(ids.has(id));
+  const scale=Number(svg.match(/scale\(([\d.]+)\)/)[1]);assert.ok(scale<previousScale);
+  assert.ok(!svg.includes('NaN'));previous=ids;previousScale=scale;
+ }
+ assert.equal(waterZoomSVG(7),waterZoomSVG(6),'the raw microscopic field is bounded; packaging is a separate final view');
+});
+test('one mole per bundle stays visible as the sample grows from one to ten moles',()=>{
+ for(const [formula,sample]of Object.entries(moleSamples))for(let amount=1;amount<=10;amount++){
+  const markup=moleBundlesMarkup(amount,formula);
+  const packs=[...markup.matchAll(/data-mol-pack="(\d+)"/g)].map(x=>Number(x[1]));
+  assert.deepEqual(packs,Array.from({length:amount},(_,i)=>i+1));
+  assert.equal((markup.match(new RegExp('<strong>1 mol '+sample.particle+'</strong>','g'))||[]).length,amount);
+  assert.equal((markup.match(/6\.02 × 10<sup>23<\/sup> 個/g)||[]).length,amount);
+  const ids=[...markup.matchAll(/\sid="([^"]+)"/g)].map(x=>x[1]);assert.equal(new Set(ids).size,ids.length,'every bundle has distinct SVG paint IDs');
+  assert.equal(molePack(amount,formula).mass,packs.length*molecularMass(formula));
+ }
 });
 test('mole animation pauses, resumes, steps and resets without stray scheduled frames',()=>{
  const pending=new Map(),seen=[];let id=0;
@@ -45,38 +111,72 @@ test('mole animation pauses, resumes, steps and resets without stray scheduled f
  player.play();assert.equal(player.state.step,0);player.go(2);assert.equal(pending.size,0);assert.deepEqual(player.state,{step:2,playing:false});
  player.play();player.reset();assert.equal(pending.size,0);assert.deepEqual(player.state,{step:0,playing:false});assert.ok(seen.length>5);
 });
-test('foundation controls count, uncount, handle zero neutrons, change quantity and reset',()=>{
- const node=(dataset={})=>({dataset,attrs:{},handlers:{},style:{setProperty(){}},addEventListener(type,fn){this.handlers[type]=fn;},setAttribute(k,v){this.attrs[k]=v;},focus(){}});
- const isotopes=Object.keys(teachingIsotopes).map(isotope=>node({isotope})),steps=[0,1,2,3].map(packStep=>node({packStep})),amounts=[1,2].map(packAmount=>node({packAmount}));
- const atomNodes=new Map(),packNodes=new Map();
+test('mole controls preserve seven stages, sample quantity and reset beside static atom comparison',()=>{
+ const node=(dataset={})=>({dataset,attrs:{},handlers:{},style:{setProperty(k,v){this[k]=v;}},addEventListener(type,fn){this.handlers[type]=fn;},setAttribute(k,v){this.attrs[k]=v;},focus(){}});
+ const packNodes=new Map();
  const get=(map,s)=>{if(!map.has(s))map.set(s,node());return map.get(s);};
- const host={querySelector:s=>get(atomNodes,s),querySelectorAll:()=>isotopes,addEventListener(_,fn){this.click=fn;}};
- const packing={dataset:{},querySelector:s=>get(packNodes,s),querySelectorAll:s=>s==='[data-pack-step]'?steps:amounts};
- get(atomNodes,'.nucleus-particles').querySelector=()=>node();
+ const sampleButtons=Object.keys(moleSamples).map(formula=>node({moleSample:formula}));
+ const packing={dataset:{},querySelector:s=>get(packNodes,s),querySelectorAll:()=>sampleButtons};
  const previous=globalThis.document;globalThis.document={addEventListener(){}};
  try{
-  const activity=mountFoundationStudio({querySelector:s=>s==='.atom-explorer'?host:packing});
-  const choose=s=>host.click({target:{closest:q=>q==='[data-isotope]'?{dataset:{isotope:s}}:null}});
-  const count=id=>host.click({target:{closest:q=>q==='[data-nucleon]'?{dataset:{nucleon:id}}:null}});
-  choose('H');count('proton-1');get(atomNodes,'.nucleus-check').onclick();
-  assert.equal(get(atomNodes,'[data-count="neutron"]').textContent,0);
-  assert.ok(get(atomNodes,'.nucleus-feedback').textContent.includes('0 個中子'));
-  count('proton-1');assert.equal(get(atomNodes,'[data-count="proton"]').textContent,0);assert.equal(get(atomNodes,'.nucleus-feedback').textContent,'');
-  choose('O');for(const p of nucleusParticles('O'))count(p.id);get(atomNodes,'.nucleus-check').onclick();assert.ok(get(atomNodes,'.nucleus-feedback').textContent.includes('質量數 16'));
+  const activity=mountFoundationStudio({querySelector:s=>s==='.mole-packing'?packing:null});
   const slide=value=>get(packNodes,'.packing-mol-slider').oninput({target:{value:String(value)}});
   const stage=get(packNodes,'.zoom-stage');let prevented=0;
   assert.equal(packing.dataset.step,'1');assert.equal(get(packNodes,'.packing-amount').hidden,true);
+  let visible=0;
+  for(let i=1;i<=6;i++){
+   stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});
+   assert.equal(prevented,i);assert.equal(packing.dataset.zoomLevel,String(i));assert.equal(get(packNodes,'.zoom-slider').value,i);
+   assert.equal(get(packNodes,'.packing-amount').hidden,true);assert.equal(get(packNodes,'.water-weighing').hidden,true);assert.equal(get(packNodes,'.packing-badge').hidden,true);
+   assert.equal(get(packNodes,'.zoom-particle-count').hidden,i<6);
+   assert.equal(stage.style['--cup-opacity'],'0');
+   const count=(get(packNodes,'.packing-molecules').innerHTML.match(/data-water=/g)||[]).length;assert.ok(count>visible);visible=count;
+  }
+  const denseSample=get(packNodes,'.packing-molecules').innerHTML;
   stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});
-  assert.equal(prevented,1);assert.equal(get(packNodes,'.packing-amount').hidden,false);assert.equal(packing.dataset.step,'3');
+  assert.equal(prevented,7);assert.equal(packing.dataset.zoomLevel,'7');assert.equal(get(packNodes,'.packing-amount').hidden,false);assert.equal(packing.dataset.step,'3');
+  assert.equal(get(packNodes,'.water-weighing').hidden,false);assert.equal(get(packNodes,'.packing-molecules').hidden,false);
+  assert.notEqual(get(packNodes,'.packing-molecules').innerHTML,denseSample);assert.equal(stage.style['--molecule-opacity'],'1');
+  const bundleCount=()=>get(packNodes,'.packing-molecules').innerHTML.match(/data-mol-pack=/g)?.length||0;
+  assert.equal(bundleCount(),1);assert.ok(get(packNodes,'.packing-molecules').innerHTML.includes('<strong>1 mol 水分子</strong>'));
+  assert.equal(get(packNodes,'.packing-molecules').attrs['aria-hidden'],'false');
+  assert.ok(get(packNodes,'.zoom-count-number').innerHTML.includes('6.02'));
   assert.ok(get(packNodes,'.packing-caption p').innerHTML.includes('6.02'));
-  slide(3);assert.equal(get(packNodes,'.packing-scale-value').textContent,'54.00 g');
-  slide(2);assert.equal(get(packNodes,'.packing-scale-value').textContent,'36.00 g');assert.ok(get(packNodes,'.packing-amount output').innerHTML.includes('1.204'));
-  slide(10);assert.equal(get(packNodes,'.packing-scale-value').textContent,'180.00 g');assert.ok(get(packNodes,'.packing-caption h5').textContent.includes('180 g'));
+  slide(3);assert.equal(get(packNodes,'.packing-scale-value').textContent,'54.00 g');assert.equal(bundleCount(),3);
+  slide(2);assert.equal(get(packNodes,'.packing-scale-value').textContent,'36.00 g');assert.equal(bundleCount(),2);assert.ok(get(packNodes,'.packing-amount output').innerHTML.includes('1.204'));
+  assert.ok(get(packNodes,'.zoom-count-number').innerHTML.includes('1.204'));
+  slide(10);assert.equal(get(packNodes,'.packing-scale-value').textContent,'180.00 g');assert.equal(bundleCount(),10);assert.ok(get(packNodes,'.packing-caption h5').textContent.includes('180 g'));
   slide(99);assert.equal(get(packNodes,'.packing-mol-slider').value,10);
-  stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});assert.equal(prevented,1,'release page scrolling at the outer limit');
+  stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});assert.equal(prevented,7,'release page scrolling at the outer limit');
   stage.handlers.wheel({deltaY:-120,deltaMode:0,preventDefault(){prevented++;}});
   assert.equal(get(packNodes,'.packing-scale-value').textContent,'180.00 g','zooming cannot change the sample amount');assert.equal(get(packNodes,'.same-mole').hidden,true);
-  activity.reset();assert.equal(get(atomNodes,'[data-count="proton"]').textContent,0);assert.equal(packing.dataset.step,'1');assert.equal(isotopes[0].attrs['aria-pressed'],'true');
+  assert.equal(bundleCount(),0);assert.equal(get(packNodes,'.packing-molecules').innerHTML,denseSample);
+  const choose=formula=>sampleButtons.find(button=>button.dataset.moleSample===formula).onclick();
+  for(const [formula,mass,particle,art]of [['C',12,'碳原子','packed-carbon-heap'],['H2',2,'氫氣分子','無色氣體'],['H2O',18,'水分子','packed-liquid']]){
+   choose(formula);
+   assert.equal(packing.dataset.zoomLevel,'0','a new substance restarts the observation');assert.equal(get(packNodes,'.packing-mol-slider').value,1);
+   assert.equal(get(packNodes,'.packing-scale-value').textContent,mass.toFixed(2)+' g');assert.equal(get(packNodes,'.packing-amount').hidden,true);
+   assert.equal(get(packNodes,'.water-weighing').hidden,true);assert.equal(get(packNodes,'.zoom-particle-count').hidden,true);assert.equal(get(packNodes,'.same-mole').hidden,true);
+   assert.equal(bundleCount(),0);
+   assert.equal(get(packNodes,'.zoom-count-unit').textContent,'個'+particle);
+   for(let i=1;i<=7;i++){
+    stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){}});
+    assert.equal(packing.dataset.zoomLevel,String(i));assert.equal(get(packNodes,'.packing-amount').hidden,i<7);assert.equal(get(packNodes,'.water-weighing').hidden,i<7);
+   }
+   assert.ok(get(packNodes,'.packing-sample-art').innerHTML.includes(art));
+   assert.equal(bundleCount(),1);
+   assert.equal(get(packNodes,'.packing-less').disabled,true);assert.equal(get(packNodes,'.packing-more').disabled,false);
+   get(packNodes,'.packing-more').onclick();get(packNodes,'.packing-more').onclick();
+   assert.equal(get(packNodes,'.packing-mol-slider').value,3);assert.equal(get(packNodes,'.packing-scale-value').textContent,(mass*3).toFixed(2)+' g');
+   assert.equal(bundleCount(),3);
+   assert.ok(get(packNodes,'.packing-amount output').innerHTML.includes('3 mol → 約 '+mass*3+' g'));assert.ok(get(packNodes,'.zoom-count-number').innerHTML.includes('1.806'));
+   get(packNodes,'.packing-less').onclick();assert.equal(get(packNodes,'.packing-scale-value').textContent,(mass*2).toFixed(2)+' g');assert.equal(bundleCount(),2);
+   slide(10);assert.equal(get(packNodes,'.packing-more').disabled,true);assert.equal(get(packNodes,'.packing-scale-value').textContent,(mass*10).toFixed(2)+' g');assert.equal(bundleCount(),10);
+   choose(formula);assert.equal(packing.dataset.zoomLevel,'7','reselecting the current substance preserves the active exploration');assert.equal(get(packNodes,'.packing-mol-slider').value,10);
+  }
+  activity.reset();assert.equal(packing.dataset.step,'1');assert.equal(get(packNodes,'.packing-scale-value').textContent,'18.00 g');
+  assert.equal(packing.dataset.sample,'H2O');assert.equal(get(packNodes,'.packing-mol-slider').value,1);
+  assert.equal(bundleCount(),0);
  }finally{globalThis.document=previous;}
 });
 test('dense mole drawings keep each displayed package equal to one mole for the entire slider range',()=>{
@@ -133,7 +233,13 @@ test('offline package embeds its assets and preserves the shared calculation cor
  const fs=await import('node:fs'),vm=await import('node:vm');
  const html=fs.readFileSync(new URL('../release/chemistry.html',import.meta.url),'utf8');
  assert.ok(!html.includes('src="./app.js"'));assert.ok(!html.includes('href="./styles.css"'));
- assert.equal((html.match(/data:image\/png;base64,/g)||[]).length,4);
+ assert.equal((html.match(/data:image\/png;base64,/g)||[]).length,6);
+ const specimenImage=html.match(/const moleSpecimens=("data:image\/png;base64,[^"]+");/);
+ assert.ok(specimenImage,'the realistic carbon and hydrogen vessel must work offline');
+ assert.equal(JSON.parse(specimenImage[1]).split(',')[1],fs.readFileSync(new URL('../dist/chemistry/assets/mole-specimens.png',import.meta.url)).toString('base64'));
+ const magnesiumImage=html.match(/const magnesiumLab=("data:image\/png;base64,[^"]+");/);
+ assert.ok(magnesiumImage,'the photographic magnesium laboratory must work offline');
+ assert.equal(JSON.parse(magnesiumImage[1]).split(',')[1],fs.readFileSync(new URL('../dist/chemistry/assets/magnesium-lab.png',import.meta.url)).toString('base64'));
  const endingImage=html.match(/src="data:image\/svg\+xml;base64,([^"]+)"/);
  assert.ok(endingImage,'the ending illustration must be available offline');
  assert.equal(Buffer.from(endingImage[1],'base64').toString('utf8'),fs.readFileSync(new URL('../dist/chemistry/assets/time-vortex.svg',import.meta.url),'utf8'));
@@ -246,18 +352,8 @@ test('mass display includes unused material in the final total, including oxygen
  assert.ok(html.includes('產物 4 g ＋ 剩餘材料 1.6 g'));assert.ok(html.includes('2.4 g ＋ 結合的氧氣 1.6 g'));
 });
 
-test('foundation question distinguishes oxygen atoms from molecules and resets the answer', async()=>{
- const {mountFoundationCheck}=await import('../dist/chemistry/lesson-intro.js');
- const buttons=[1,16,32].map(value=>({dataset:{atomicMass:String(value)},attrs:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(type,fn){this.click=fn;}}));
- const feedback={dataset:{},textContent:''};
- const root={querySelectorAll(){return buttons;},querySelector(){return feedback;}};
- const check=mountFoundationCheck(root);
- buttons[2].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('O₂'));
- buttons[1].click();assert.equal(feedback.dataset.correct,'true');assert.ok(feedback.textContent.includes('16 g'));assert.equal(buttons.filter(b=>b.attrs['aria-pressed']==='true').length,1);
- buttons[0].click();assert.equal(feedback.dataset.correct,'false');assert.ok(feedback.textContent.includes('氫原子'));
- check.reset();assert.equal(feedback.dataset.correct,undefined);assert.ok(buttons.every(b=>b.attrs['aria-pressed']==='false'));
-});
-import {balanceDemonstrationSteps} from '../dist/chemistry/balance-demo.js';
+import {balanceDemonstrationSteps,mountBalanceDemonstration} from '../dist/chemistry/balance-demo.js';
+import {balanceCoach,balanceOrder} from '../dist/chemistry/balance-coach.js';
 import {realisticReactionScene} from '../dist/chemistry/reaction-scenes.js';
 test('worked balancing example fixes oxygen first, then hydrogen without changing the molecules',()=>{
  const ledgers=balanceDemonstrationSteps.map(s=>atomLedger('water',s.coeff));
@@ -265,12 +361,56 @@ test('worked balancing example fixes oxygen first, then hydrogen without changin
  assert.deepEqual(ledgers[1].rows,[{e:'H',left:2,right:4},{e:'O',left:2,right:2}]);
  assert.ok(ledgers[2].balanced&&ledgers[2].minimal);
 });
+test('student guidance reaches all four simplest equations and suggests usable controls at the coefficient limit',()=>{
+ for(const id of balanceOrder){
+  const coeff=reactions[id].coeff.map(()=>1);let attempts=0;
+  while(!atomLedger(id,coeff).balanced&&attempts++<30){
+   const coach=balanceCoach(id,coeff);assert.equal(coach.tone,'working');
+   assert.ok(coach.index>=0&&coach.index<coeff.length);coeff[coach.index]+=coach.delta;
+   assert.ok(coeff.every(value=>value>=1&&value<=12));
+  }
+  assert.ok(attempts<30);assert.deepEqual(coeff,reactions[id].coeff);assert.equal(balanceCoach(id,coeff).tone,'success');
+  assert.equal(balanceCoach(id,coeff.map(n=>n*2)).tone,'reduce');
+ }
+ const limit=balanceCoach('iron',[12,12,12]);assert.equal(limit.delta,-1);assert.ok([12,12,12][limit.index]>1);assert.ok(limit.hint.includes('−減少'));
+ const oxygen=balanceCoach('water',[1,1,1]),hydrogen=balanceCoach('water',[1,1,2]);
+ assert.equal(oxygen.index,2);assert.ok(oxygen.title.includes('氧'));assert.equal(hydrogen.index,0);assert.ok(hydrogen.title.includes('氫'));
+});
+test('students can enter practice directly or finish the example and switch back without resetting their exercise',()=>{
+ const previous=globalThis.document;let focused=null;
+ const make=()=>({attrs:{},children:[],classList:{add(){}},setAttribute(key,value){this.attrs[key]=value;},append(node){this.children.push(node);},before(...nodes){this.beforeNodes=nodes;},scrollIntoView(){},focus(){focused=this;}});
+ const practice=make(),method=make(),board=make(),next=make(),restart=make(),select=make();select.value='iron';
+ const modes=['demo','practice'].map(mode=>({...make(),dataset:{balanceMode:mode}}));
+ const steps=[0,1,2].map(step=>({...make(),dataset:{balanceDemo:String(step)}}));
+ const nodes={'.equation-workbench':practice,'.balance-method':method,'.balance-demo-board':board,'.balance-demo-next':next,'.balance-demo-restart':restart,'.balance-select':select};
+ const root={querySelector:selector=>nodes[selector],querySelectorAll:selector=>selector==='[data-balance-mode]'?modes:steps};
+ globalThis.document={createElement:()=>make()};
+ try{
+  const flow=mountBalanceDemonstration(root),demo=practice.beforeNodes[1];
+  assert.equal(practice.hidden,false);assert.equal(demo.hidden,true);assert.equal(restart.disabled,true);assert.ok(practice.children.includes(method));
+  modes[1].onclick();assert.equal(practice.hidden,false);assert.equal(demo.hidden,true);assert.equal(focused,select);
+  modes[0].onclick();assert.equal(practice.hidden,true);assert.equal(select.value,'iron');
+  next.onclick();assert.equal(steps[1].attrs['aria-pressed'],'true');assert.ok(board.innerHTML.includes('aria-label="1 H2 加 1 O2 生成 2 H2O"'));
+  next.onclick();assert.equal(steps[2].attrs['aria-pressed'],'true');assert.ok(board.innerHTML.includes('最簡係數比是 2：1：2'));
+  next.onclick();assert.equal(practice.hidden,false);assert.equal(select.value,'iron');
+  modes[0].onclick();assert.equal(steps[2].attrs['aria-pressed'],'true','returning to the example preserves the current step');
+  flow.reset();assert.equal(practice.hidden,false);assert.equal(steps[0].attrs['aria-pressed'],'true');assert.equal(restart.disabled,true);
+ }finally{globalThis.document=previous;}
+});
+test('magnesium remains in the spoon while the lamp and material change through the photographic experiment',()=>{
+ const before=realisticReactionScene('light',0),during=realisticReactionScene('light',.5),after=realisticReactionScene('light',1);
+ for(const svg of [before,during,after]){assert.ok(svg.includes('magnesium-lab.png'));assert.ok(svg.includes('data-instrument="combustion-spoon"'));assert.ok(svg.includes('材料放大'));}
+ assert.ok(before.includes('data-state="unlit"'));assert.ok(during.includes('data-state="lit"'));assert.ok(after.includes('data-state="unlit"'));
+ assert.ok(before.includes('data-material="magnesium-ribbon" opacity="1"'));assert.ok(after.includes('data-material="magnesium-oxide" opacity="1"'));
+ assert.ok(after.includes('白色氧化鎂 MgO'));
+});
 test('all reaction drawings retain resolvable materials and instrument references throughout playback',()=>{
  for(const id of ['light','color','solid','gas']){
   for(const p of [0,.1,.3,.5,.8,1]){
    const svg=realisticReactionScene(id,p),ids=[...svg.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
    assert.equal(new Set(ids).size,ids.length,id+' has duplicate SVG ids');
    for(const ref of svg.matchAll(/url\(#([^)]+)\)/g))assert.ok(ids.includes(ref[1]),ref[1]);
+    for(const ref of svg.matchAll(/href="#([^"]+)"/g))assert.ok(ids.includes(ref[1]),ref[1]);
    assert.ok(!/NaN|Infinity|undefined/.test(svg),id+' has invalid geometry');
   }
   assert.notEqual(realisticReactionScene(id,0),realisticReactionScene(id,1));
@@ -324,6 +464,48 @@ test('holding the dropper pairs presses with release, cancellation and keyboard 
 
 import {activityProgress,activityComplete,mainMastered} from '../dist/chemistry/learning-progress.js';
 import {reactionComparison,demonstrations} from '../dist/chemistry/phenomena.js';
+import {mountPhenomena} from '../dist/chemistry/phenomena.js';
+import {createHeatingPractice,loadHeatingSample,setHeatingFlame} from '../dist/chemistry/reaction-practice.js';
+import {reactionRecords} from '../dist/chemistry/reaction-lab.js';
+test('heating requires a loaded specimen and an extinguished lamp preserves the material',()=>{
+ const heat=createHeatingPractice();assert.ok(!setHeatingFlame(heat,true));assert.ok(!heat.lit);
+ const empty=realisticReactionScene('light',0,'empty',{heat});assert.ok(empty.includes('等待放入鎂帶'));assert.ok(empty.includes('data-material="magnesium-ribbon" opacity="0"'));
+ assert.ok(loadHeatingSample(heat));assert.ok(!loadHeatingSample(heat));assert.ok(setHeatingFlame(heat,true));
+ assert.ok(realisticReactionScene('light',.4,'lit',{heat}).includes('data-state="lit"'));
+ assert.ok(setHeatingFlame(heat,false));assert.ok(realisticReactionScene('light',.4,'paused',{heat}).includes('data-state="unlit"'));assert.ok(heat.loaded);
+ const color=realisticReactionScene('color',0,'empty',{heat:createHeatingPractice()});assert.ok(color.includes('蒸發皿 · 等待取樣'));assert.ok(!color.includes('M278 199l'));
+});
+test('the observation sheet records evidence only after each experiment was observed',()=>{
+ const empty=reactionRecords(demonstrations,new Set());assert.equal((empty.match(/尚未觀察/g)||[]).length,4);
+ const one=reactionRecords(demonstrations,new Set(['gas']));assert.equal((one.match(/尚未觀察/g)||[]).length,3);assert.ok(one.includes('產生氣泡'));assert.ok(!one.includes('✓ 銀白色鎂帶'));
+ const all=reactionRecords(demonstrations,new Set(demonstrations.map(d=>d.id)));assert.ok(all.includes('4 / 4'));assert.ok(!all.includes('尚未觀察'));
+});
+test('the hands-on bench loads, heats, pauses, mixes, drops, cancels stale motion and retains observations',()=>{
+ // Small DOM/timer fixture exercises the mounted controller and real event bindings.
+ const names=['.view-comparison','.next-reaction','.reaction-phase','.reaction-name','.reaction-workflow','.reaction-comparison','.reaction-art','progress','.hands-on-hint','.reaction-observation','.reaction-equation','.reaction-note','.reaction-science','.demonstrate','.lamp-grab','.sample-load-zone','.practice-controls','.drop-count','.squeeze-dropper','.reaction-notes','.reaction-drop-target','.reaction-records','.reaction-rewind','.reaction-interactive-scene','.observation-lab'];
+ const node=()=>({dataset:{},style:{},events:{},children:[],textContent:'',innerHTML:'',disabled:false,hidden:false,classes:new Set(),classList:{add(){},remove(){},toggle(){}},setAttribute(k,v){this[k]=v;},addEventListener(k,f){(this.events[k]??=[]).push(f);},querySelector(s){return this.child??=(node());},focus(){},scrollIntoView(){},getBoundingClientRect(){return {left:0,top:0,right:760,bottom:440,width:760,height:440};},setPointerCapture(){},hasPointerCapture(){return true;},releasePointerCapture(){}});
+ const nodes=Object.fromEntries(names.map(s=>[s,node()])),samples=demonstrations.map((d,i)=>({...node(),dataset:{demo:String(i)}})),tools=['sodium','calcium','dropper'].map(id=>({...node(),dataset:{practiceTool:id}}));
+ const query=s=>{if(nodes[s])return nodes[s];if(s==='[data-practice-tool="dropper"]')return tools[2];const m=s.match(/^\[data-demo="(\d)"\]$/);if(m)return samples[+m[1]];throw Error('Unexpected selector '+s);};
+ const root={...node(),prepend(){},querySelector:query,querySelectorAll:s=>s==='[data-demo]'?samples:s==='[data-practice-tool]'?tools:s==='.squeeze-dropper,.dropper-grab'?[nodes['.squeeze-dropper'],tools[2]]:[]};
+ const previous={document:globalThis.document,window:globalThis.window,performance:globalThis.performance,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
+ let now=0,serial=0,marks=0;const frames=new Map(),timers=new Map(),data={};
+ const click=b=>{if(b.disabled)return;const e={detail:1,preventDefault(){}};b.events.click?.forEach(f=>f(e));b.onclick?.(e);};
+ const advance=ms=>{now+=ms;const pending=[...frames.values()];frames.clear();pending.forEach(f=>f(now));[...timers.values()].forEach(f=>f());};
+ globalThis.document={hidden:false,createElement:node,addEventListener(){}};globalThis.window={addEventListener(){}};globalThis.performance={now:()=>now};globalThis.requestAnimationFrame=f=>{frames.set(++serial,f);return serial;};globalThis.cancelAnimationFrame=id=>frames.delete(id);globalThis.setInterval=f=>{timers.set(++serial,f);return serial;};globalThis.clearInterval=id=>timers.delete(id);
+ try{
+  const lab=mountPhenomena(root,{data,mark:()=>marks++});assert.equal(root.dataset.loaded,'false');assert.ok(nodes['.lamp-grab'].disabled);assert.ok(nodes['.demonstrate'].hidden);
+  click(samples[0]);assert.equal(root.dataset.loaded,'true');click(nodes['.lamp-grab']);assert.equal(root.dataset.heating,'true');advance(1800);const paused=nodes.progress.value;click(nodes['.lamp-grab']);advance(1000);assert.equal(nodes.progress.value,paused);assert.equal(root.dataset.heating,'false');
+  click(nodes['.demonstrate']);advance(5000);assert.deepEqual(data.phenomenaSeen,['light']);assert.equal(root.dataset.heating,'false');assert.ok(!nodes['.reaction-comparison'].hidden);
+  click(samples[1]);assert.equal(root.dataset.reaction,'color');assert.equal(nodes.progress.value,0);assert.equal(root.dataset.loaded,'true');click(nodes['.lamp-grab']);advance(5000);assert.deepEqual(data.phenomenaSeen,['light','color']);
+  click(samples[2]);click(tools[0]);advance(1000);assert.ok(tools[0].disabled);assert.ok(!data.phenomenaSeen.includes('solid'));click(tools[1]);advance(1000);advance(5000);assert.ok(data.phenomenaSeen.includes('solid'));
+  click(samples[3]);assert.ok(nodes['.squeeze-dropper'].disabled);click(tools[2]);assert.ok(!nodes['.squeeze-dropper'].disabled);
+  const down={button:0,pointerId:1,preventDefault(){}};nodes['.squeeze-dropper'].events.pointerdown[0](down);advance(700);assert.equal(nodes['.drop-count'].textContent,'已滴入 2 滴');nodes['.squeeze-dropper'].events.pointerup[0](down);advance(700);assert.equal(nodes['.drop-count'].textContent,'已滴入 2 滴');assert.ok(data.phenomenaSeen.includes('gas'));assert.equal(marks,4);
+  click(nodes['.reaction-rewind']);assert.ok(nodes['.squeeze-dropper'].disabled);assert.equal(nodes['.drop-count'].textContent,'已滴入 0 滴');assert.equal(data.phenomenaSeen.length,4);
+  click(samples[2]);click(tools[0]);click(samples[1]);advance(1000);assert.equal(root.dataset.reaction,'color');assert.equal(nodes.progress.value,0);assert.equal(root.dataset.loaded,'true');
+  click(nodes['.lamp-grab']);root.events.workspaceclose[0]();advance(5000);assert.equal(root.dataset.heating,'false');assert.equal(nodes.progress.value,0);
+  lab.reset();assert.deepEqual(data.phenomenaSeen,[]);assert.equal(root.dataset.reaction,'light');assert.equal(root.dataset.loaded,'false');assert.ok(nodes['.reaction-records'].innerHTML.includes('0 / 4'));
+ }finally{Object.assign(globalThis,previous);}
+});
 import {prepareStudio} from '../dist/chemistry/studio.js';
 test('main stations need actual activity evidence and a correct answer without any prediction',()=>{
  const data={moleculeAssembled:true,phenomenaSeen:['light','color','solid','gas'],balanced:['water','magnesium','iron','peroxide'],stoichLevels:[1,2,3],massRecords:[{soda:4.2,acid:6,closed:false},{soda:4.2,acid:6,closed:true}]};
@@ -394,17 +576,17 @@ test('enlarging a workspace keeps the original activity controls inside the moda
  }finally{globalThis.document=previous;}
 });
 
-test('foundation presents one concept at a time and leads into assembly without losing the embedded question',async()=>{
+test('foundation presents one concept at a time and leads into assembly',async()=>{
  const {mountFoundationSteps}=await import('../dist/chemistry/lesson-intro.js');
  const previous=globalThis.document;let focused=null,scrolled=null;
  const make=()=>({children:[],attrs:{},classList:{add(){}},setAttribute(k,v){this.attrs[k]=v;},append(...nodes){this.children.push(...nodes);},before(node){this.beforeNode=node;},after(node){this.afterNode=node;},focus(){focused=this;},scrollIntoView(){scrolled=this;}});
- const panels=[make(),make(),make()],grid=make(),bridge=make(),footnote=make(),choice=make();
+ const panels=[make(),make(),make()],grid=make(),footnote=make(),choice=make();
  const back=make(),next=make(),count=make(),buttons=[0,1,2].map(i=>({...make(),dataset:{concept:String(i)}}));
  const assembly={...make(),querySelector:()=>choice};
- const root={classList:{add(){}},querySelectorAll:()=>panels,querySelector:s=>({'.foundation-grid':grid,'.atomic-mole-bridge':bridge,'.foundation-footnote':footnote}[s]),closest:()=>({querySelector:()=>assembly})};
+ const root={classList:{add(){}},querySelectorAll:()=>panels,querySelector:s=>({'.foundation-grid':grid,'.foundation-footnote':footnote}[s]),closest:()=>({querySelector:()=>assembly})};
  globalThis.document={createElement:name=>({...make(),querySelectorAll:()=>buttons,querySelector:s=>({'.concept-back':back,'.concept-next':next,'.concept-count':count}[s])})};
  try{
-  const flow=mountFoundationSteps(root);assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);assert.ok(panels[2].children.includes(bridge));
+  const flow=mountFoundationSteps(root);assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);
   next.onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);assert.equal(focused,panels[1]);
   buttons[2].onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,true,false]);assert.equal(count.textContent,'觀念 3 / 3');
   next.onclick();assert.equal(scrolled,assembly);assert.equal(focused,choice);
