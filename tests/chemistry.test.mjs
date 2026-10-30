@@ -5,7 +5,93 @@ import {cleanData} from '../dist/chemistry/state.js';
 import {reactionClock} from '../dist/chemistry/components.js';
 import {svgFrame} from '../dist/chemistry/art.js';
 import {cards,lessons,supplementCards,practiceProblems} from '../dist/chemistry/data.js';
+import {teachingIsotopes,nucleusParticles,countedNucleus,molePack,createPackingPlayer,mountFoundationStudio,waterPackingSVG,createMoleZoom} from '../dist/chemistry/foundation-studio.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8, a+' ≠ '+b);
+test('counting nuclei preserves isotope composition, including hydrogen without a neutron',()=>{
+ for(const [symbol,p,n]of [['C',6,6],['H',1,0],['O',8,8]]){
+  const particles=nucleusParticles(symbol);
+  assert.equal(particles.filter(x=>x.kind==='proton').length,p);
+  assert.equal(particles.filter(x=>x.kind==='neutron').length,n);
+  assert.equal(new Set(particles.map(x=>x.id)).size,p+n);
+  assert.ok(particles.every(x=>Number.isFinite(x.x)&&Number.isFinite(x.y)));
+  assert.equal(teachingIsotopes[symbol].protons+teachingIsotopes[symbol].neutrons,p+n);
+  const marked=particles.map(x=>x.id);
+  assert.deepEqual(countedNucleus(symbol,marked.concat(marked,'electron-1')),{protons:p,neutrons:n,complete:true});
+  assert.equal(countedNucleus(symbol,marked.slice(1)).complete,false);
+ }
+ assert.deepEqual(countedNucleus('H',[]),{protons:0,neutrons:0,complete:false});
+});
+test('water mole packs scale particle number and mass together without changing molecular mass',()=>{
+ for(const amount of [.5,1,2]){const pack=molePack(amount);assert.equal(pack.amount,amount);assert.equal(pack.particles,amount*CLASS_NA);assert.equal(pack.mass,amount*18);assert.equal(pack.mass/pack.amount,molecularMass('H2O'));}
+ assert.equal(molePack(2).particles,2*molePack().particles);
+});
+test('wheel zoom supports mouse notches, trackpads and line or page deltas without trapping boundary scroll',()=>{
+ const zoom=createMoleZoom(()=>{});
+ assert.equal(zoom.wheel(-100),false);assert.equal(zoom.value,0);
+ for(let i=0;i<4;i++)zoom.wheel(25);assert.equal(zoom.value,1);
+ assert.equal(zoom.wheel(100),false);zoom.wheel(-100);assert.equal(zoom.value,0);
+ zoom.wheel(120);assert.equal(zoom.value,1);
+ zoom.reset();zoom.wheel(7.5,1);assert.equal(zoom.value,1);
+ zoom.reset();zoom.wheel(1,2);assert.equal(zoom.value,1);
+ assert.equal(zoom.wheel(NaN),false);zoom.set(-10);assert.equal(zoom.value,0);zoom.set(4);assert.equal(zoom.value,1);
+});
+test('mole animation pauses, resumes, steps and resets without stray scheduled frames',()=>{
+ const pending=new Map(),seen=[];let id=0;
+ const player=createPackingPlayer(x=>seen.push(x),{schedule:fn=>{pending.set(++id,fn);return id;},cancel:key=>pending.delete(key)});
+ const tick=()=>{const [key,fn]=pending.entries().next().value;pending.delete(key);fn();};
+ player.play();assert.equal(pending.size,1);tick();assert.deepEqual(player.state,{step:1,playing:true});
+ player.pause();assert.equal(pending.size,0);assert.equal(player.state.step,1);
+ player.play();tick();assert.equal(player.state.step,2);tick();assert.deepEqual(player.state,{step:3,playing:false});assert.equal(pending.size,0);
+ player.play();assert.equal(player.state.step,0);player.go(2);assert.equal(pending.size,0);assert.deepEqual(player.state,{step:2,playing:false});
+ player.play();player.reset();assert.equal(pending.size,0);assert.deepEqual(player.state,{step:0,playing:false});assert.ok(seen.length>5);
+});
+test('foundation controls count, uncount, handle zero neutrons, change quantity and reset',()=>{
+ const node=(dataset={})=>({dataset,attrs:{},handlers:{},style:{setProperty(){}},addEventListener(type,fn){this.handlers[type]=fn;},setAttribute(k,v){this.attrs[k]=v;},focus(){}});
+ const isotopes=Object.keys(teachingIsotopes).map(isotope=>node({isotope})),steps=[0,1,2,3].map(packStep=>node({packStep})),amounts=[1,2].map(packAmount=>node({packAmount}));
+ const atomNodes=new Map(),packNodes=new Map();
+ const get=(map,s)=>{if(!map.has(s))map.set(s,node());return map.get(s);};
+ const host={querySelector:s=>get(atomNodes,s),querySelectorAll:()=>isotopes,addEventListener(_,fn){this.click=fn;}};
+ const packing={dataset:{},querySelector:s=>get(packNodes,s),querySelectorAll:s=>s==='[data-pack-step]'?steps:amounts};
+ get(atomNodes,'.nucleus-particles').querySelector=()=>node();
+ const previous=globalThis.document;globalThis.document={addEventListener(){}};
+ try{
+  const activity=mountFoundationStudio({querySelector:s=>s==='.atom-explorer'?host:packing});
+  const choose=s=>host.click({target:{closest:q=>q==='[data-isotope]'?{dataset:{isotope:s}}:null}});
+  const count=id=>host.click({target:{closest:q=>q==='[data-nucleon]'?{dataset:{nucleon:id}}:null}});
+  choose('H');count('proton-1');get(atomNodes,'.nucleus-check').onclick();
+  assert.equal(get(atomNodes,'[data-count="neutron"]').textContent,0);
+  assert.ok(get(atomNodes,'.nucleus-feedback').textContent.includes('0 個中子'));
+  count('proton-1');assert.equal(get(atomNodes,'[data-count="proton"]').textContent,0);assert.equal(get(atomNodes,'.nucleus-feedback').textContent,'');
+  choose('O');for(const p of nucleusParticles('O'))count(p.id);get(atomNodes,'.nucleus-check').onclick();assert.ok(get(atomNodes,'.nucleus-feedback').textContent.includes('質量數 16'));
+  const slide=value=>get(packNodes,'.packing-mol-slider').oninput({target:{value:String(value)}});
+  const stage=get(packNodes,'.zoom-stage');let prevented=0;
+  assert.equal(packing.dataset.step,'1');assert.equal(get(packNodes,'.packing-amount').hidden,true);
+  stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});
+  assert.equal(prevented,1);assert.equal(get(packNodes,'.packing-amount').hidden,false);assert.equal(packing.dataset.step,'3');
+  assert.ok(get(packNodes,'.packing-caption p').innerHTML.includes('6.02'));
+  slide(3);assert.equal(get(packNodes,'.packing-scale-value').textContent,'54.00 g');
+  slide(2);assert.equal(get(packNodes,'.packing-scale-value').textContent,'36.00 g');assert.ok(get(packNodes,'.packing-amount output').innerHTML.includes('1.204'));
+  slide(10);assert.equal(get(packNodes,'.packing-scale-value').textContent,'180.00 g');assert.ok(get(packNodes,'.packing-caption h5').textContent.includes('180 g'));
+  slide(99);assert.equal(get(packNodes,'.packing-mol-slider').value,10);
+  stage.handlers.wheel({deltaY:120,deltaMode:0,preventDefault(){prevented++;}});assert.equal(prevented,1,'release page scrolling at the outer limit');
+  stage.handlers.wheel({deltaY:-120,deltaMode:0,preventDefault(){prevented++;}});
+  assert.equal(get(packNodes,'.packing-scale-value').textContent,'180.00 g','zooming cannot change the sample amount');assert.equal(get(packNodes,'.same-mole').hidden,true);
+  activity.reset();assert.equal(get(atomNodes,'[data-count="proton"]').textContent,0);assert.equal(packing.dataset.step,'1');assert.equal(isotopes[0].attrs['aria-pressed'],'true');
+ }finally{globalThis.document=previous;}
+});
+test('dense mole drawings keep each displayed package equal to one mole for the entire slider range',()=>{
+ const loose=waterPackingSVG(1,1);
+ assert.equal((loose.match(/class="loose-water-molecule"/g)||[]).length,72);
+ assert.ok(!loose.includes('href="#packing-water-cloud"'));
+ assert.ok(!loose.includes('data-mol-pack='));
+ for(let amount=1;amount<=10;amount++)for(const step of [2,3]){
+  const svg=waterPackingSVG(amount,step);
+  assert.equal((svg.match(/data-mol-pack=/g)||[]).length,amount);
+  assert.ok((svg.match(/href="#packing-water-molecule"/g)||[]).length>=900);
+  assert.ok(!svg.includes('NaN'));
+  assert.equal(molePack(amount).mass,18*amount);
+ }
+});
 for(const [formula,mass]of Object.entries({H2O:18,CO2:44,CH4:16,H2SO4:98,NaCl:58.5,Al2O3:102,'CuSO4·5H2O':250,'Ca(OH)2':74,CH3COOH:60,CH3COONa:82}))test('formula mass '+formula,()=>near(molecularMass(formula),mass));
 test('nested and repeated elements',()=>{assert.deepEqual(parseFormula('CH3COOH'),{C:2,H:4,O:2});assert.deepEqual(parseFormula('Ca(OH)2'),{Ca:1,O:2,H:2});assert.equal(protonCount('H2SO4'),50);});
 test('invalid inputs rejected',()=>{for(const x of ['','Xx2','H0','H-2','Ca(OH','H2)O','H2O·'])assert.throws(()=>parseFormula(x));for(const n of [-1,NaN,Infinity,'',null])assert.throws(()=>finite(n));assert.throws(()=>atomLedger('water',[1.2,1,1]));});
@@ -239,17 +325,16 @@ test('holding the dropper pairs presses with release, cancellation and keyboard 
 import {activityProgress,activityComplete,mainMastered} from '../dist/chemistry/learning-progress.js';
 import {reactionComparison,demonstrations} from '../dist/chemistry/phenomena.js';
 import {prepareStudio} from '../dist/chemistry/studio.js';
-test('main stations need a prediction, actual activity evidence and a correct answer; extensions are optional',()=>{
+test('main stations need actual activity evidence and a correct answer without any prediction',()=>{
  const data={moleculeAssembled:true,phenomenaSeen:['light','color','solid','gas'],balanced:['water','magnesium','iron','peroxide'],stoichLevels:[1,2,3],massRecords:[{soda:4.2,acid:6,closed:false},{soda:4.2,acid:6,closed:true}]};
- const state={data,observed:[],predictions:{},answers:{}};
+ const state={data,observed:[],answers:{}};
  for(const card of cards){
   assert.ok(activityComplete(card.id,data));assert.ok(!mainMastered(card,state));
-  state.answers[card.id]=card.quiz.answer;assert.ok(!mainMastered(card,state));
-  state.predictions[card.id]=0;assert.ok(mainMastered(card,state));
+  state.answers[card.id]=card.quiz.answer;assert.ok(mainMastered(card,state));
  }
  assert.ok(cards.every(card=>mainMastered(card,state)));
  assert.equal(data.handoutSolved,undefined);assert.equal(data.finalReason,undefined);
- const old={data:{},observed:cards.map(c=>c.id),predictions:state.predictions,answers:state.answers};
+ const old={data:{},observed:cards.map(c=>c.id),predictions:{},answers:state.answers};
  assert.ok(cards.every(card=>!mainMastered(card,old)),'legacy page-open flags must not unlock stations');
 });
 test('activity counters ignore duplicate observations and only accept matching positive mass trials',()=>{
@@ -274,7 +359,7 @@ test('one acid drop can show an honest in-progress comparison with two numbered 
  assert.ok(markup.includes('滴入鹽酸後 · 觀察中'));assert.ok(markup.includes('<span>01</span>'));assert.ok(markup.includes('<span>02</span>'));
  assert.equal((markup.match(/<figure>/g)||[]).length,2);assert.ok(!markup.includes('NaN'));
 });
-test('enlarging a workspace keeps prediction controls inside the modal and restores their identity on close',()=>{
+test('enlarging a workspace keeps the original activity controls inside the modal and restores them on close',()=>{
  // Minimal DOM fixture tests node ownership and restoration, not visual layout.
  class Node {
   constructor(name){this.name=name;this.children=[];this.style={};this.attrs={};this.classes=new Set();this.classList={add:x=>this.classes.add(x),remove:x=>this.classes.delete(x)};}
@@ -294,36 +379,41 @@ test('enlarging a workspace keeps prediction controls inside the modal and resto
   close(){this.open=false;this.onclose();}
  }
  const previous=globalThis.document;let focused=null;const events=[];
- const card=new Node('card'),prediction=new Node('prediction'),choice=new Node('button'),root=new Node('root'),activity=new Node('activity');
- prediction.className='prediction';prediction.append(choice);root.append(activity);card.append(prediction,root);
+ const card=new Node('card'),choice=new Node('button'),root=new Node('root'),activity=new Node('activity');
+ activity.append(choice);root.append(activity);card.append(root);
  globalThis.document={createElement:name=>new Node(name),createComment:()=>new Node('comment'),body:{style:{overflow:'auto'}}};
  try{
   prepareStudio(root,{number:'01',title:'分子組裝室',description:'組裝'},{});
   const heading=root.children[0],open=heading.querySelector('button');
   for(let cycle=0;cycle<2;cycle++){
    open.onclick();const dialog=root.children.find(n=>n.name==='dialog'),body=dialog.querySelector('.studio-dialog-body');
-   assert.equal(prediction.parent,body);assert.equal(activity.parent,body);assert.equal(prediction.children[0],choice);assert.equal(focused,choice);assert.equal(globalThis.document.body.style.overflow,'hidden');
-   dialog.close();assert.deepEqual(card.children,[prediction,root]);assert.deepEqual(root.children,[heading,activity]);assert.equal(focused,open);assert.equal(globalThis.document.body.style.overflow,'auto');
+   assert.equal(activity.parent,body);assert.equal(activity.children[0],choice);assert.equal(globalThis.document.body.style.overflow,'hidden');
+   dialog.close();assert.deepEqual(card.children,[root]);assert.deepEqual(root.children,[heading,activity]);assert.equal(focused,open);assert.equal(globalThis.document.body.style.overflow,'auto');
   }
   assert.deepEqual(events,['workspaceclose','workspaceclose']);
  }finally{globalThis.document=previous;}
 });
 
-test('foundation presents one concept at a time and leads into the prediction without losing the embedded question',async()=>{
+test('foundation presents one concept at a time and leads into assembly without losing the embedded question',async()=>{
  const {mountFoundationSteps}=await import('../dist/chemistry/lesson-intro.js');
  const previous=globalThis.document;let focused=null,scrolled=null;
  const make=()=>({children:[],attrs:{},classList:{add(){}},setAttribute(k,v){this.attrs[k]=v;},append(...nodes){this.children.push(...nodes);},before(node){this.beforeNode=node;},after(node){this.afterNode=node;},focus(){focused=this;},scrollIntoView(){scrolled=this;}});
  const panels=[make(),make(),make()],grid=make(),bridge=make(),footnote=make(),choice=make();
  const back=make(),next=make(),count=make(),buttons=[0,1,2].map(i=>({...make(),dataset:{concept:String(i)}}));
- const prediction={...make(),querySelector:()=>choice};
- const root={classList:{add(){}},querySelectorAll:()=>panels,querySelector:s=>({'.foundation-grid':grid,'.atomic-mole-bridge':bridge,'.foundation-footnote':footnote}[s]),closest:()=>({querySelector:()=>prediction})};
+ const assembly={...make(),querySelector:()=>choice};
+ const root={classList:{add(){}},querySelectorAll:()=>panels,querySelector:s=>({'.foundation-grid':grid,'.atomic-mole-bridge':bridge,'.foundation-footnote':footnote}[s]),closest:()=>({querySelector:()=>assembly})};
  globalThis.document={createElement:name=>({...make(),querySelectorAll:()=>buttons,querySelector:s=>({'.concept-back':back,'.concept-next':next,'.concept-count':count}[s])})};
  try{
   const flow=mountFoundationSteps(root);assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);assert.ok(panels[2].children.includes(bridge));
   next.onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);assert.equal(focused,panels[1]);
   buttons[2].onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,true,false]);assert.equal(count.textContent,'觀念 3 / 3');
-  next.onclick();assert.equal(scrolled,prediction);assert.equal(focused,choice);
-  back.onclick();assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);
+  next.onclick();assert.equal(scrolled,assembly);assert.equal(focused,choice);
+  assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);back.onclick();assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);
   flow.reset();assert.deepEqual(panels.map(p=>p.hidden),[false,true,true]);assert.ok(back.disabled);
+  let finished=0;const changes=[];
+  const embedded=mountFoundationSteps(root,{finish:()=>finished++,onChange:n=>changes.push(n)});
+  embedded.show(2,false);next.onclick();assert.equal(finished,1);
+  embedded.show(1,false);assert.deepEqual(panels.map(p=>p.hidden),[true,false,true]);
+  embedded.reset();assert.deepEqual(changes,[0,2,1,0]);
  }finally{globalThis.document=previous;}
 });

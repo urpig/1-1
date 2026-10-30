@@ -25,7 +25,7 @@ export const lessons=[
       "不可以，可能有做不到的原因",
       "還不確定，我想先找證據"
     ],
-    "task": "比較三個變化，判斷是否形成新物質。記下你的第一個猜想。",
+    "task": "比較三個變化，判斷是否形成新物質。",
     "explanation": [
       "冰融成水，仍然是水（H₂O），只是從固體變成液體。沒有變出新物質，叫做<b>物理變化</b>。",
       "鐵生鏽後，出現了和鐵不同的鐵鏽。有新物質生成，叫做<b>化學變化</b>。把礦石切碎，只改變大小，不會因此變成黃金。",
@@ -610,7 +610,7 @@ export const lessons=[
         "金的身分是 79 個質子。要改變它，得進入原子核的世界。"
       ]
     ],
-    "prediction": "現在重新判斷：石頭與賢者之石都不含 Au，普通化學反應能生成黃金嗎？",
+    "prediction": "根據實驗判斷：石頭與賢者之石都不含 Au，普通化學反應能生成黃金嗎？",
     "choices": [
       "可以，只要把反應式配平",
       "不可以，化學反應不會製造原本沒有的金元素",
@@ -737,7 +737,7 @@ export const practiceProblems=[
 const take=id=>lessons.find(c=>c.id===id);
 // Stable IDs preserve saved answers; order is independent of those IDs.
 export const cards=[
- {...take(5),...journey[3],id:3,title:'原子量、分子量與莫耳',question:'原子量、分子量與莫耳，分別在回答什麼問題？',task:'看懂觀念 → 組好一種物質 → 回答一題。',extras:[4,6,7]},
+ {...take(5),...journey[3],id:3,title:'原子量、分子量與莫耳',question:'這些名詞是什麼意思呢？',task:'看懂觀念 → 組好一種物質 → 回答一題。',extras:[4,6,7]},
  {...take(2),...journey[1],id:1,type:'phenomena',title:'化學反應的常見現象',prediction:take(1).prediction,choices:take(1).choices,task:'完成四種反應觀察，再回答一題。',extras:[]},
  {...take(9),...journey[4],id:4,title:'化學反應式怎麼寫？',extras:[8,10]},
  {...take(11),...journey[5],id:5,title:'用反應式預測產量',question:'已知投入多少克，如何算出能生成多少克產物？',task:'看例題 → 完成三個小關卡 → 回答一題。',extras:[]},

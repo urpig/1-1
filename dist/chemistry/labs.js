@@ -69,7 +69,7 @@ export function mountLab(root,ctx){
  const invalidate=()=>{clock.reset();renderSamples();notice(root,'用量已更新；開始新一輪觀察，原紀錄仍保留。');};
  const setDose=bindNumber(root,'lab-dose',v=>{dose=v;invalidate();}),setPartner=bindNumber(root,'lab-partner',v=>{partner=v;invalidate();});
  function valid(){
-  if(!ctx.predict())return false;
+
   if(root.querySelector('input:invalid'))return false;
   if(!ready()){notice(root,'先拿取下方材料，放到器材的虛線區；點材料也可以。');return false;}
   if(result().extent<=0){notice(root,'用量為 0 時不會有產物，請先調整材料。');return false;}
@@ -77,7 +77,7 @@ export function mountLab(root,ctx){
  }
  function begin(){if(!valid())return;if(id==='magnesium'&&p>=1){heat=false;capOff=true;root.querySelector('.heat-check').checked=false;clock.reset();}if(heated()&&!heat&&(id==='hydrate'||p===0)){heat=true;if(id==='magnesium')capOff=true;root.querySelector('.heat-check').checked=true;}clock.start();notice(root,heated()?'留意材料的顏色、白光與產物；可以暫停觀察。':'兩種材料接觸後開始反應，留意杯內變化與右側讀數。');}
  function add(which){
-  if(!ctx.predict()||running)return;
+  if(running)return;
   if(which===1){added=true;if(id==='magnesium')second=true;}else second=true;
   draw();notice(root,ready()?(id==='magnesium'?'鎂帶已用坩堝鉗夾好；點燃下方的酒精燈開始加熱。':heated()?'材料已放好，點器材旁的「點燃熱源」。':'材料接觸，開始觀察變化。'):'已放入一種材料，再放入另一種。');
   if(ready()&&(!heated()||heat)&&result().extent>0){root.querySelector('.apparatus-viewport').classList.remove('pouring');void root.offsetWidth;root.querySelector('.apparatus-viewport').classList.add('pouring');begin();}
@@ -87,7 +87,7 @@ export function mountLab(root,ctx){
  drop.onclick=()=>add(added?2:1);
  drop.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();add(added?2:1);}};
  function toggleHeat(){
-  if(!ctx.predict())return;
+
   heat=!heat;if(id==='magnesium')capOff=heat;root.querySelector('.heat-check').checked=heat;
   if(heat&&ready()&&result().extent>0)begin();
   else if(!heat&&id==='hydrate'){clock.pause();notice(root,'移開熱源後先暫停這段受熱過程；重新加熱可繼續。');}
@@ -180,10 +180,10 @@ export function mountMass(root,ctx){
  const clock=reactionClock((value,run)=>{p=value;running=run;draw();},finish);
  const changeDose=()=>{added=false;baseline=false;clock.reset();notice(root,'用量已改變，請重新放入小杯並記錄反應前質量。');};
  const setSoda=bindNumber(root,'mass-soda',v=>{soda=v;changeDose();}),setAcid=bindNumber(root,'mass-acid',v=>{acid=v;changeDose();});
- function add(){if(!ctx.predict()||running||added||!valid())return;added=true;draw();notice(root,'小杯已放入瓶內，粉末還沒接觸醋酸。準備裝置後先秤量。');}
+ function add(){if(running||added||!valid())return;added=true;draw();notice(root,'小杯已放入瓶內，粉末還沒接觸醋酸。準備裝置後先秤量。');}
  makeDraggable(root.querySelector('.soda-token'),root.querySelector('.mass-drop'),add,root.querySelector('.activity-status'));root.querySelector('.load-cup').onclick=add;root.querySelector('.mass-drop').onclick=add;root.querySelector('.mass-drop').onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();add();}};
- function weigh(){if(!ctx.predict()||running||!added||!valid()||(closed&&!collect)||p>0)return;baseline=true;draw();notice(root,'已記錄反應前整組質量 '+format(state().initial)+' g。現在可以傾斜混合。');}
- function begin(){if(!ctx.predict()||!baseline||!valid()||!added||(closed&&!collect)||state().extent<=0||p>=1)return;clock.start();}
+ function weigh(){if(running||!added||!valid()||(closed&&!collect)||p>0)return;baseline=true;draw();notice(root,'已記錄反應前整組質量 '+format(state().initial)+' g。現在可以傾斜混合。');}
+ function begin(){if(!baseline||!valid()||!added||(closed&&!collect)||state().extent<=0||p>=1)return;clock.start();}
  function reset(){baseline=false;added=false;setSoda(soda);setAcid(acid);clock.reset();notice(root,'器材與用量已保留。重新放入小杯，記錄新的反應前讀數。');}
  function system(value){if(running)return;if(p>0)reset();closed=value;collect=false;baseline=false;draw();notice(root,closed?'已裝上瓶塞。放入小杯後，還要接妥集氣管。':'瓶口開放；瓶塞、管線與集氣袋仍放在秤盤上一起秤。');}
  function connect(){if(!closed||!added||running||p>0)return;collect=true;baseline=false;draw();notice(root,'集氣管已接妥，生成的氣體會留在集氣袋中。先記錄反應前質量。');}

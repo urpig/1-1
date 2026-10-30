@@ -72,10 +72,10 @@ export function mountPhenomena(root,ctx){
  function reset(){cancelMotion();practice=createReactionPractice();dropper={x:583,y:221};clock.reset();}
  function animate(duration,update,done){const epoch=++animationEpoch,start=performance.now();busy=true;function tick(now){if(epoch!==animationEpoch)return;const t=Math.min(1,(now-start)/duration);update(t);draw();if(t<1)frame=requestAnimationFrame(tick);else{busy=false;done();draw();}}frame=requestAnimationFrame(tick);}
  function addSolution(id){
-  if(demonstrations[selected].id!=='solid'||busy||practice.solutions.includes(id)||!ctx.predict())return;
+  if(demonstrations[selected].id!=='solid'||busy||practice.solutions.includes(id))return;
   pour={id,t:0};animate(1000,t=>pour={id,t},()=>{pour=null;addPracticeSolution(practice,id);if(practice.solutions.length===2)clock.start();});
  }
- function positionDropper(){if(busy||practice.drops>=PRACTICE_DROPS||!ctx.predict())return;dropper={x:368,y:221};placePracticeDropper(practice,true);draw();}
+ function positionDropper(){if(busy||practice.drops>=PRACTICE_DROPS)return;dropper={x:368,y:221};placePracticeDropper(practice,true);draw();}
  function squeeze(){
   if(demonstrations[selected].id!=='gas'||busy||!addPracticeDrop(practice))return;
   const before=p,target=practice.drops/PRACTICE_DROPS;
@@ -92,7 +92,7 @@ export function mountPhenomena(root,ctx){
  window.addEventListener('blur',releaseAll);
  root.addEventListener('workspaceclose',()=>{releaseAll();if(running)clock.pause();});
  document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();});
- q('.demonstrate').onclick=()=>{if(!ctx.predict())return;if(running)clock.pause();else if(p===1){if(demonstrations[selected].id==='solid')reset();else{clock.reset();clock.start();}}else clock.start();};
+ q('.demonstrate').onclick=()=>{if(running)clock.pause();else if(p===1){if(demonstrations[selected].id==='solid')reset();else{clock.reset();clock.start();}}else clock.start();};
  q('.reaction-rewind').onclick=reset;
  qa('[data-demo]').forEach(b=>b.onclick=()=>{clock.pause();selected=+b.dataset.demo;reset();});
  function scenePoint(e){const r=q('.reaction-interactive-scene').getBoundingClientRect();return {x:(e.clientX-r.left)*760/r.width,y:(e.clientY-r.top)*440/r.height};}
@@ -101,7 +101,7 @@ export function mountPhenomena(root,ctx){
   b.onclick=()=>{if(suppressClick){suppressClick=false;return;}if(tool==='dropper'){if(!practice.dropperReady)positionDropper();}else addSolution(tool);};
   b.onpointerdown=e=>{if(e.button!==0||b.disabled||(tool==='dropper'&&practice.dropperReady))return;suppressClick=false;const at=scenePoint(e);drag={id:tool,start:at,x:at.x,y:at.y,origin:{...dropper},moved:false};b.setPointerCapture(e.pointerId);};
   b.onpointermove=e=>{if(!drag||drag.id!==tool||!b.hasPointerCapture(e.pointerId))return;const at=scenePoint(e);drag.x=at.x;drag.y=at.y;drag.moved=drag.moved||Math.hypot(at.x-drag.start.x,at.y-drag.start.y)>5;if(!drag.moved)return;if(tool==='dropper')dropper={x:Math.max(25,Math.min(735,drag.origin.x+at.x-drag.start.x)),y:Math.max(180,Math.min(380,drag.origin.y+at.y-drag.start.y))};draw();};
-  b.onpointerup=e=>{if(!drag||drag.id!==tool)return;const at=scenePoint(e),moved=drag.moved;drag=null;if(b.hasPointerCapture(e.pointerId))b.releasePointerCapture(e.pointerId);if(!moved)return;suppressClick=true;if(tool==='dropper'){const inside=ctx.predict()&&dropper.x>=292&&dropper.x<=442&&dropper.y>=175&&dropper.y<=260;placePracticeDropper(practice,inside);dropper=inside?{x:368,y:221}:{x:583,y:221};draw();}else{draw();if(at.x>=270&&at.x<=460&&at.y>=145&&at.y<=355)addSolution(tool);}setTimeout(()=>{suppressClick=false;},0);};
+  b.onpointerup=e=>{if(!drag||drag.id!==tool)return;const at=scenePoint(e),moved=drag.moved;drag=null;if(b.hasPointerCapture(e.pointerId))b.releasePointerCapture(e.pointerId);if(!moved)return;suppressClick=true;if(tool==='dropper'){const inside=dropper.x>=292&&dropper.x<=442&&dropper.y>=175&&dropper.y<=260;placePracticeDropper(practice,inside);dropper=inside?{x:368,y:221}:{x:583,y:221};draw();}else{draw();if(at.x>=270&&at.x<=460&&at.y>=145&&at.y<=355)addSolution(tool);}setTimeout(()=>{suppressClick=false;},0);};
   b.onpointercancel=()=>{suppressClick=true;drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();};
   b.onlostpointercapture=()=>{if(drag?.id===tool){suppressClick=true;drag=null;if(tool==='dropper')dropper=practice.dropperReady?{x:368,y:221}:{x:583,y:221};draw();}};
  });
