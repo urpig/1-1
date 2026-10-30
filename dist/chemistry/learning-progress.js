@@ -12,7 +12,7 @@ export function activityProgress(id,data={}){
  return {done:pair?2:records.length?1:0,total:2,label:'完成同用量的開放、密閉實驗'};
 }
 export function activityComplete(id,data){const p=activityProgress(id,data);return p.done===p.total;}
-export function mainMastered(card,state){return state.predictions?.[card.id]!==undefined&&activityComplete(card.id,state.data)&&state.answers[card.id]===card.quiz.answer;}
+export function mainMastered(card,state){return activityComplete(card.id,state.data)&&state.answers[card.id]===card.quiz.answer;}
 export function quizHint(id){return ({
  3:'先把每種原子的原子量乘上個數，再把結果加起來。注意：分子量沒有單位。',
  1:'氣泡、發光或變色都是線索。想一想：前後是否真的出現不同的物質？',
